@@ -45,8 +45,14 @@
                 <li><a href="#">Featured</a></li>
             </ul>
         </div>
-        <div class="login">
-            <button class="login" onclick="openLogin()"><i class="fa-solid fa-user"></i></button>
+        <div class="nav-right">
+            <div class="cart">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cart-count">0</span>
+            </div>
+            <div class="login">
+                <button class="login" onclick="openLogin()"><i class="fa-solid fa-user"></i></button>
+            </div>
         </div>
 
     </div>
@@ -83,6 +89,15 @@
 
         <h6>Price Range</h6>
         <input type="range" class="form-range" min="1000" max="10000" step="500">
+
+        <h6>Product Type</h6>
+        <ul>
+          <li><input type="checkbox"> Saree</li>
+          <li><input type="checkbox"> Kurta</li>
+          <li><input type="checkbox"> Fabric</li>
+          <li><input type="checkbox"> Textile</li>
+          <li><input type="checkbox"> </li>
+        </ul>
       </aside>
 
       <!-- Products Grid -->
