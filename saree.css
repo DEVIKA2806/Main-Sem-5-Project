@@ -50,6 +50,31 @@
     text-decoration: underline;
 }
 
+.cart {
+  position: relative;
+  font-size: 1.2rem;
+  color: #ECE3CE;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: 700;
+}
+
+.cart:hover {
+  color:#3A4D39;
+}
+
+#cart-count {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: #739072;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 2px 6px;
+}
+
 .login {
     height: 40px;
     width: 80px;
@@ -57,7 +82,7 @@
     border: none;
     color: #ECE3CE;
     background-color:#3A4D39;
-    font-size: 1.2rem;
+    font-size: 1.6rem;
     font-weight: 600;
 }
 
@@ -65,7 +90,6 @@
     background-color:#ECE3CE;
     color: #3A4D39;
     height: 39px;
-    font-size: 1.5rem;
 } 
 
 /* Search Bar
