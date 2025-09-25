@@ -34,13 +34,18 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/contact', contactRoutes);
 
-// Serve frontend static files
-const FRONTEND_DIR = process.env.FRONTEND_DIR || '../frontend';
-app.use(express.static(path.join(__dirname, FRONTEND_DIR)));
+// Serve static frontend files
+const FRONTEND_DIR = path.join(__dirname, '../frontend');
+app.use(express.static(FRONTEND_DIR));
+
+// Serve assets (images, etc.)
+const ASSETS_DIR = path.join(__dirname, '../assets');
+app.use('/assets', express.static(ASSETS_DIR));
+
 
 // Fallback: index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, FRONTEND_DIR, 'index.html'));
+  res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
 });
 
 app.listen(PORT, () => {
