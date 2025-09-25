@@ -1,0 +1,296 @@
+/* === Shop Page Custom Styles === */
+
+/* Body */
+.shop-body {
+    background-color: #ebe8e2;
+    font-family: 'Poppins', sans-serif;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 95px;
+    width: 100%;
+    background-color:#4F6F52;
+    border-bottom: 2px solid rgba(00,00,00,0.1);
+    padding: 0 30px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    box-shadow: 0.1px 0.1px 50px rgba(0, 0, 0, 0.25);
+}
+
+.logo img {
+    height: 92px;
+    width: 300px;
+}
+
+.nav-items {
+    align-self: flex-end;
+}
+
+.nav-items ul {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-items a {
+    text-decoration: none;
+    color:#ECE3CE;
+    font-size: 1.3rem;
+    font-weight: 500;
+}
+
+.nav-items a:hover {
+    font-weight: 510;
+    text-decoration: underline;
+}
+
+.cart {
+  position: relative;
+  font-size: 1.2rem;
+  color: #ECE3CE;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: 700;
+}
+
+.cart:hover {
+  color:#3A4D39;
+}
+
+#cart-count {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: #739072;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 2px 6px;
+}
+
+.login {
+    height: 40px;
+    width: 80px;
+    border-radius: 90px;
+    border: none;
+    color: #ECE3CE;
+    background-color:#3A4D39;
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.login:hover {
+    background-color:#ECE3CE;
+    color: #3A4D39;
+    height: 39px;
+} 
+
+/* Search Bar
+.shop-search {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.shop-search input {
+    width: 50%;
+    padding: 8px 12px;
+    border: 2px solid #739072;
+    border-radius: 6px;
+    outline: none;
+}
+
+.shop-search button {
+    background-color: #739072;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+}
+
+.shop-search button:hover {
+    background-color: #557a55;
+}
+
+/* Sidebar Filters */
+/* aside {
+    font-size: 15px;
+}
+
+aside h5 {
+    border-bottom: 2px solid #4F6F52;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+}
+
+aside h6 {
+    color: #4F6F52;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+aside ul li {
+    margin-bottom: 6px;
+}
+
+/* Product Cards */
+/* .card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.btn-green {
+    background-color: #739072;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 5px;
+    color: white;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.btn-green:hover {
+    background-color: #557a55;
+}
+
+/* Responsive Sidebar */
+/* @media (max-width: 768px) {
+    aside {
+        display: none;
+        margin-top: 15px;
+    }
+    aside.active {
+        display: block;
+    }
+    .filter-toggle {
+        display: block;
+        background-color: #739072;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+}  */
+
+
+/* footer */
+.site-footer {
+  background-color: #3A4D39; /* dark green background */
+  color: #ECE3CE; /* light cream text */
+  padding: 40px 20px 20px;
+  margin-top: 50px;
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.footer-section h3 {
+  color: #ECE3CE;
+  margin-bottom: 15px;
+}
+
+.footer-section p, 
+.footer-section a {
+  color: #ECE3CE;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.footer-section a:hover {
+  color: #4F6F52; /* lighter green hover */
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 8px;
+}
+
+.footer-section ul li a {
+  color: #ECE3CE;
+}
+
+.footer-section ul li a:hover {
+  color: #4F6F52;
+}
+
+/* Newsletter Form */
+#newsletterForm {
+  display: flex;
+  flex-direction: column;
+}
+
+#newsletterForm input {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 25px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  outline: none;
+}
+
+#newsletterForm button {
+  background-color: #4F6F52;
+  color: #ECE3CE;
+  border: none;
+  border-radius: 25px;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.3s ease;
+}
+
+#newsletterForm button:hover {
+  background-color: #ECE3CE;
+  color: #3A4D39;
+}
+
+#newsletterMsg {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #ECE3CE;
+}
+
+/* Social icons */
+.social-links a {
+  font-size: 1.5rem;
+  margin-right: 15px;
+  color: #ECE3CE;
+  transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+  color: #4F6F52;
+}
+
+/* Footer bottom */
+.footer-bottom {
+  border-top: 1px solid rgba(236, 227, 206, 0.3);
+  margin-top: 20px;
+  padding-top: 15px;
+  text-align: center;
+  font-size: 0.9rem;
+}

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shop-now</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="shop-body">
+    <div class="shop-navbar">
+        <div class="logo">
+            <img src="assets/logo_img.png">
+        </div>
+        <!-- <div class="shop-search">
+            <input type="text" placeholder="Search items..." id="search-input">
+            <button id="search-btn"><i class="fa fa-search"></i> Search</button>
+        </div> -->
+        <div class="nav-bar">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li>|</li>
+                <li><a href="#">Items</a></li>
+                <li>|</li>
+                <li><a href="contact.html" onclick="openContact()">Contact Us</a></li>
+                <li>|</li>
+                <li><a href="#">Featured</a></li>
+            </ul>
+        </div>
+        <div class="nav-right">
+            <div class="shop-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <div class="cart">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cart-count">0</span>
+            </div>
+            <div class="login">
+                <button class="login" onclick="openLogin()"><i class="fa-solid fa-user"></i></button>
+            </div>
+            <div class="sell-btn">
+                <button class="btn btn-green-outline" onclick="openSeller()">Join as Seller <i class="fa-solid fa-handshake-simple"></i></button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="shop-content">
+        <div class="body-items">
+            <a href="saree.html">
+                <img src="assets/shop-img-1.jpg">
+                <h3>Saree Collection</h3>
+            </a>
+        </div>
+        <div class="body-items">
+            <a href="#">
+                <img src="assets/shop-img-2.jpg">
+                <h3>Artifacts Collection</h3>
+            </a>
+        </div>
+        <div class="body-items">
+            <a href="#">
+                <img src="assets/shop-img-3.jpg">
+                <h3>Lifestyle Picks</h3>
+            </a>
+        </div>
+    </div>
+
+    <div class="shop-items">
+        <h1 class="item-head">Saree</h1>
+        <div class="shop-item">
+            <div class="item">
+                <img src="assets/paithani-img.jpg" alt="Paithani">
+                <p>Paithani</p>
+            </div>
+            <div class="item">
+                <img src="assets/banarsi-img.jpg" alt="Banarsi">
+                <p>Banarsi</p>
+            </div>
+            <div class="item">
+                <img src="assets/kanjivaram-img.jpg" alt="Kanjivaram">
+                <p>Kanjivaram</p>
+            </div>
+            <div class="item">
+                <img src="assets/patola-img.jpg" alt="Patola">
+                <p>Patola</p>
+            </div>
+            <div class="item">
+                <img src="assets/bandhani-img.jpg" alt="Bandhani">
+                <p>Bandhani</p>
+            </div>
+        </div>
+
+        <h1 class="item-head">Handicrafts</h1>
+        <div class="shop-item">
+            <div class="item">
+                <img src="assets/textile-img.jpg" alt="Paithani">
+                <p>Textile</p>
+            </div>
+            <div class="item">
+                <img src="assets/glass-img.jpg" alt="Banarsi">
+                <p>Glass DIY</p>
+            </div>
+            <div class="item">
+                <img src="assets/shell-img.jpg" alt="Kanjivaram">
+                <p>Seaside Craft</p>
+            </div>
+            <div class="item">
+                <img src="assets/wooden-img.jpg" alt="Patola">
+                <p>Wood Craft</p>
+            </div>
+            <div class="item">
+                <img src="assets/leather-img.jpg" alt="Bandhani">
+                <p>Leather Craft</p>
+            </div>
+        </div>
+
+        <h1 class="item-head">Lifestyle Picks</h1>
+        <div class="shop-item">
+            <div class="item">
+                <img src="assets/dhoop-img.jpg" alt="Paithani">
+                <p>Vedic Aroma</p>
+            </div>
+            <div class="item">
+                <img src="assets/pots-img.jpg" alt="Banarsi">
+                <p>Clay Craft</p>
+            </div>
+            <div class="item">
+                <img src="assets/spices-img.jpg" alt="Kanjivaram">
+                <p>Flavours of India</p>
+            </div>
+            <div class="item">
+                <img src="assets/wooden-img.jpg" alt="Patola">
+                <p>Wood Craft</p>
+            </div>
+            <div class="item">
+                <img src="assets/leather-img.jpg" alt="Bandhani">
+                <p>Leather Craft</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Us Modal -->
+    <!-- <div id="contactModal" class="contact-modal">
+        <div class="contact-card">
+            <h2>Contact Us</h2>
+            <form id="contactForm">
+                <input type="text" id="name" placeholder="Your Name" required>
+                <input type="email" id="email" placeholder="Your Email" required>
+                <textarea id="message" rows="5" placeholder="Your Message" required></textarea>
+                <button type="submit">Send Message</button>
+                <button type="button" class="close-btn" onclick="closeContact()">Close</button>
+            </form>
+            <div id="contactMsg" class="contact-message"></div>
+        </div>
+    </div> -->
+
+    <!-- Seller Modal -->
+    <div id="sellerModal" class="modal">
+        <div class="modal-card">
+            <h2>Join as Seller</h2>
+            <form id="sellerForm">
+            <input type="text" id="sellerName" placeholder="Name" required>
+            <input type="email" id="sellerEmail" placeholder="Email" required>
+            <input type="tel" id="sellerPhone" placeholder="Phone" required>
+            <input type="text" id="sellerBusiness" placeholder="Business Name" required>
+            <textarea id="sellerProducts" placeholder="Products" required></textarea>
+            <button type="submit">Submit</button>
+            <button type="button" class="close-btn" onclick="closeSeller()">Close</button>
+            </form>
+            <div id="sellerMsg"></div>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+
+            <!-- About Us -->
+            <div class="footer-section">
+            <h3>About Us</h3>
+            <p>We aim to connect sellers and buyers through a simple and elegant platform. 
+                <a href="about.html">Learn more →</a>
+            </p>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="footer-section">
+            <h3>Quick Links</h3>
+            <ul>
+                <li><a href="#about-section">About Us</a></li>
+                <li><a href="shop-now.html">Shop Now</a></li>
+                <li><a href="#" onclick="openSeller()">Join as Seller</a></li>
+                <li><a href="#" onclick="openContact()">Contact Us</a></li>
+            </ul>
+            </div>
+
+            <!-- Newsletter -->
+            <div class="footer-section">
+            <h3>Stay Updated</h3>
+            <form id="newsletterForm">
+                <input type="email" placeholder="Enter your email" required>
+                <button type="submit">Subscribe</button>
+                <p id="newsletterMsg"></p>
+            </form>
+            </div>
+
+            <!-- Social -->
+            <div class="footer-section">
+            <h3>Follow Us</h3>
+            <div class="social-links">
+                <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
+            </div>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2025 YourWebsite. All rights reserved.</p>
+        </div>
+    </footer>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
