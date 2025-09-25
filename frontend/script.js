@@ -1,6 +1,6 @@
 // Redirect to shop page
 document.getElementById("shop-now").addEventListener("click", function() {
-    window.location.href = "shop-now.html";
+    window.location.href = "/shop-now.html";
 });
 
 // -------------------- LOGIN MODAL --------------------
@@ -76,36 +76,44 @@ function closeContact() {
     if (contactForm) contactForm.reset();
     
     // 2. *** THE CRITICAL CHANGE: Redirect the user back to the main page ***
-    window.location.href = "index.html"; 
+    window.location.href = "/index.html"; 
 }
 
 // Ensure the form submission (if successful) also redirects after a delay
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
+contactForm.addEventListener('submit', function(e) {
+    e.preventDefault();
 
-        const name = document.getElementById('name').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const message = document.getElementById('message').value.trim();
-        const contactMsg = document.getElementById('contactMsg');
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const message = document.getElementById('message').value.trim();
+    const contactMsg = document.getElementById('contactMsg');
 
-        if (!name || !email || !message) {
-            contactMsg.style.color = "red";
-            contactMsg.textContent = "Please fill in all fields.";
-            return;
-        }
+    if (!name || !email || !message) {
+        contactMsg.style.color = "red";
+        contactMsg.textContent = "Please fill in all fields.";
+        return;
+    }
 
-        contactMsg.style.color = "green";
-        contactMsg.textContent = "Thank you for contacting us! Redirecting to homepage...";
-        this.reset();
-        
-        // Redirect after a short delay so the user sees the success message
-        setTimeout(() => {
-            window.location.href = "index.html"; 
-        }, 2000); 
+    // POST data to backend
+    fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, phone, message })
+    })
+    .then(res => res.json())
+    .then(data => {
+      contactMsg.style.color = 'green';
+      contactMsg.textContent = 'Thank you for contacting us!';
+      contactForm.reset(); // reset form after submission
+    })
+    .catch(err => {
+      console.error(err);
+      contactMsg.style.color = 'red';
+      contactMsg.textContent = 'Something went wrong. Please try again.';
     });
-}
+});
+
 
 // -------------------- DROPDOWN --------------------
 function toggleDropdown(event) {
