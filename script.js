@@ -37,48 +37,97 @@ function validateModalLogin() {
 }
 
 // -------------------- CONTACT MODAL --------------------
-function openContact() {
-    document.getElementById('contactModal').style.display = 'flex';
-}
+// function openContact() {
+//     document.getElementById('contactModal').style.display = 'flex';
+// }
 
+// function closeContact() {
+//     document.getElementById('contactModal').style.display = 'none';
+//     document.getElementById('contactMsg').textContent = '';
+//     document.getElementById('contactForm').reset();
+// }
+
+// document.getElementById('contactForm').addEventListener('submit', function(e) {
+//     e.preventDefault();
+
+//     const name = document.getElementById('name').value.trim();
+//     const email = document.getElementById('email').value.trim();
+//     const message = document.getElementById('message').value.trim();
+//     const contactMsg = document.getElementById('contactMsg');
+
+//     if (!name || !email || !message) {
+//         contactMsg.style.color = "red";
+//         contactMsg.textContent = "Please fill in all fields.";
+//         return;
+//     }
+
+//     contactMsg.style.color = "green";
+//     contactMsg.textContent = "Thank you for contacting us!";
+//     this.reset();
+// });
+
+// Function to handle closing the Contact page and redirecting to the index page.
 function closeContact() {
-    document.getElementById('contactModal').style.display = 'none';
-    document.getElementById('contactMsg').textContent = '';
-    document.getElementById('contactForm').reset();
+    // 1. Clear any residual form data/messages (good practice)
+    const contactMsg = document.getElementById('contactMsg');
+    const contactForm = document.getElementById('contactForm');
+    
+    if (contactMsg) contactMsg.textContent = '';
+    if (contactForm) contactForm.reset();
+    
+    // 2. *** THE CRITICAL CHANGE: Redirect the user back to the main page ***
+    window.location.href = "index.html"; 
 }
 
-document.getElementById('contactForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+// Ensure the form submission (if successful) also redirects after a delay
+const contactForm = document.getElementById('contactForm');
+if (contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
 
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const message = document.getElementById('message').value.trim();
-    const contactMsg = document.getElementById('contactMsg');
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const message = document.getElementById('message').value.trim();
+        const contactMsg = document.getElementById('contactMsg');
 
-    if (!name || !email || !message) {
-        contactMsg.style.color = "red";
-        contactMsg.textContent = "Please fill in all fields.";
-        return;
-    }
+        if (!name || !email || !message) {
+            contactMsg.style.color = "red";
+            contactMsg.textContent = "Please fill in all fields.";
+            return;
+        }
 
-    contactMsg.style.color = "green";
-    contactMsg.textContent = "Thank you for contacting us!";
-    this.reset();
-});
+        contactMsg.style.color = "green";
+        contactMsg.textContent = "Thank you for contacting us! Redirecting to homepage...";
+        this.reset();
+        
+        // Redirect after a short delay so the user sees the success message
+        setTimeout(() => {
+            window.location.href = "index.html"; 
+        }, 2000); 
+    });
+}
 
 // -------------------- DROPDOWN --------------------
-function toggleDropdown() {
-    const dropdown = document.getElementById('itemsDropdown');
-    dropdown.classList.toggle('show');
+function toggleDropdown(event) {
+    event.preventDefault();
+    const parent = event.target.closest(".dropdown");
+
+    // Close other dropdowns
+    document.querySelectorAll(".dropdown").forEach(d => {
+        if (d !== parent) d.classList.remove("open");
+    });
+
+    // Toggle current dropdown
+    parent.classList.toggle("open");
 }
 
-// Close dropdown if clicking outside
-window.addEventListener('click', function(e) {
-    const dropdown = document.getElementById('itemsDropdown');
-    if (!e.target.closest('.dropdown')) {
-        dropdown.classList.remove('show');
+// Close dropdown if clicked outside
+document.addEventListener("click", function(e) {
+    if (!e.target.closest(".dropdown")) {
+        document.querySelectorAll(".dropdown").forEach(d => d.classList.remove("open"));
     }
 });
+
 
 // -------------------- SELLER MODAL --------------------
 function openSeller() {
