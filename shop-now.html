@@ -22,17 +22,9 @@
             <ul>
                 <li><a href="index.html">Home</a></li>
                 <li>|</li>
-                <li class="dropdown">
-                    <a href="#" onclick="toggleDropdown()">Items <i class="fa-solid fa-caret-down"></i></a>
-                    <ul id="itemsDropdown" class="dropdown-content">
-                        <li><a href="#">Fabrics</a></li>
-                        <li><a href="#">Decor Items</a></li>
-                        <li><a href="#">Saree</a></li>
-                        <li><a href="#">Home Essentials</a></li>
-                    </ul>
-                </li>
+                <li><a href="#">Items</a></li>
                 <li>|</li>
-                <li><a href="#" onclick="openContact()">Contact Us</a></li>
+                <li><a href="contact.html" onclick="openContact()">Contact Us</a></li>
                 <li>|</li>
                 <li><a href="#">Featured</a></li>
             </ul>
@@ -47,6 +39,9 @@
             </div>
             <div class="login">
                 <button class="login" onclick="openLogin()"><i class="fa-solid fa-user"></i></button>
+            </div>
+            <div class="sell-btn">
+                <button class="btn btn-green-outline" onclick="openSeller()">Join as Seller <i class="fa-solid fa-handshake-simple"></i></button>
             </div>
         </div>
     </div>
@@ -147,7 +142,7 @@
     </div>
 
     <!-- Contact Us Modal -->
-    <div id="contactModal" class="contact-modal">
+    <!-- <div id="contactModal" class="contact-modal">
         <div class="contact-card">
             <h2>Contact Us</h2>
             <form id="contactForm">
@@ -158,6 +153,23 @@
                 <button type="button" class="close-btn" onclick="closeContact()">Close</button>
             </form>
             <div id="contactMsg" class="contact-message"></div>
+        </div>
+    </div> -->
+
+    <!-- Seller Modal -->
+    <div id="sellerModal" class="modal">
+        <div class="modal-card">
+            <h2>Join as Seller</h2>
+            <form id="sellerForm">
+            <input type="text" id="sellerName" placeholder="Name" required>
+            <input type="email" id="sellerEmail" placeholder="Email" required>
+            <input type="tel" id="sellerPhone" placeholder="Phone" required>
+            <input type="text" id="sellerBusiness" placeholder="Business Name" required>
+            <textarea id="sellerProducts" placeholder="Products" required></textarea>
+            <button type="submit">Submit</button>
+            <button type="button" class="close-btn" onclick="closeSeller()">Close</button>
+            </form>
+            <div id="sellerMsg"></div>
         </div>
     </div>
 
