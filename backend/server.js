@@ -1,4 +1,5 @@
-require('dotenv').config();
+// Tells dotenv to look one directory up (in the main project root) for the .env file.
+require('dotenv').config({ path: '../.env' });
 const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
