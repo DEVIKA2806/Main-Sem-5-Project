@@ -1,20 +1,42 @@
 // Function to safely get an element and prevent errors if it doesn't exist
 const safeGetElement = (id) => document.getElementById(id);
 
-// -------------------- REDIRECT TO SHOP PAGE FIX --------------------
-// This was causing the initial crash on non-index pages.
-const shopNowBtn = safeGetElement("shop-now");
-if (shopNowBtn) {
-    shopNowBtn.addEventListener("click", function() {
-        window.location.href = "/shop-now.html";
-    });
-}
+// *****************************************************************
+// 1. GLOBAL FUNCTIONS (Defined at the top to prevent "ReferenceError")
+// *****************************************************************
 
+// --- LOGIN/LOGOUT/MODAL FUNCTIONS ---
 
-// -------------------- LOGIN MODAL --------------------
 function openLogin() {
     const loginModal = safeGetElement('loginModal');
-    if (loginModal) loginModal.style.display = 'flex';
+    if (!loginModal) return;
+
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+    const loginCard = loginModal.querySelector('.login-card');
+
+    if (token && user) {
+        // User is logged in: Show SIGN OUT and Close options
+        loginCard.innerHTML = `
+            <h3>Welcome Back, ${user.name}!</h3>
+            <button onclick="logout()">Log Out</button>
+            <button class="close-btn" onclick="closeLogin()">Close</button>
+        `;
+    } else {
+        // User is logged out: Restore LOGIN and SIGN IN form
+        // This is done by restoring the original static structure from index.html
+        loginCard.innerHTML = `
+            <h3>Login</h3>
+            <input type="email" id="modalUsername" placeholder="Email" />
+            <input type="password" id="modalPassword" placeholder="Password" />
+            <div id="modalError" class="error"></div>
+            <button onclick="validateModalLogin()">Login</button>
+            <button class="sign-in-btn" onclick="window.location.href='register.html'; closeLogin()">Sign In</button>
+            <button class="close-btn" onclick="closeLogin()">Close</button>
+        `;
+    }
+    
+    loginModal.style.display = 'flex';
 }
 
 function closeLogin() {
@@ -31,8 +53,13 @@ function closeLogin() {
     if (password) password.value = '';
 }
 
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.reload(); 
+}
+
 function validateModalLogin() {
-    // Only proceed if elements exist (e.g., if we are on index.html)
     const emailInput = safeGetElement('modalUsername');
     const passwordInput = safeGetElement('modalPassword');
     const errorMsg = safeGetElement('modalError');
@@ -48,7 +75,6 @@ function validateModalLogin() {
         return;
     }
 
-    // Make API call
     fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -77,10 +103,40 @@ function validateModalLogin() {
     });
 }
 
+// --- RESELL/SELLER FUNCTIONS ---
 
-// -------------------- CONTACT MODAL --------------------
+function openResell() {
+    const resellModal = safeGetElement('resellModal');
+    if (resellModal) resellModal.style.display = 'flex';
+}
 
-// Function to handle closing the Contact page and redirecting to the index page.
+function closeResell() {
+    const resellModal = safeGetElement('resellModal');
+    const resellMsg = safeGetElement('resellMsg');
+    const resellForm = safeGetElement('resellForm');
+    
+    if (resellModal) resellModal.style.display = 'none';
+    if (resellMsg) resellMsg.textContent = '';
+    if (resellForm) resellForm.reset();
+}
+
+function openSeller() {
+    const sellerModal = safeGetElement('sellerModal');
+    if (sellerModal) sellerModal.style.display = 'flex';
+}
+
+function closeSeller() {
+    const sellerModal = safeGetElement('sellerModal');
+    const sellerMsg = safeGetElement('sellerMsg');
+    const sellerForm = safeGetElement('sellerForm');
+    
+    if (sellerModal) sellerModal.style.display = 'none';
+    if (sellerMsg) sellerMsg.textContent = '';
+    if (sellerForm) sellerForm.reset();
+}
+
+// --- CONTACT FUNCTION ---
+
 function closeContact() {
     const contactMsg = safeGetElement('contactMsg');
     const contactForm = safeGetElement('contactForm');
@@ -88,37 +144,75 @@ function closeContact() {
     if (contactMsg) contactMsg.textContent = '';
     if (contactForm) contactForm.reset();
     
-    // Assuming contact.html is a standalone page, redirecting to index.html is the goal.
     window.location.href = "/index.html"; 
 }
 
-const contactForm = safeGetElement('contactForm'); // <-- Element is safely retrieved here
+// --- DYNAMIC NAV BUTTON RENDERING ---
+function renderNavButton() {
+    const container = safeGetElement('navLoginContainer');
+    if (!container) return;
 
-// Check if the form exists before trying to add a listener!
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (token && user) {
+        // Logged In: Show Logout button with name
+        container.innerHTML = `
+            <button class="btn-green login" onclick="openLogin()">
+                <i class="fa-solid fa-user"></i>
+            </button>
+        `;
+    } else {
+        // Logged Out: Show original Login icon
+        container.innerHTML = `
+            <button class="login" onclick="openLogin()">
+                <i class="fa-solid fa-user"></i>
+            </button>
+        `;
+    }
+}
+
+
+// *****************************************************************
+// 2. EVENT LISTENERS AND PAGE LOGIC 
+// *****************************************************************
+
+// Run the dynamic button logic on page load
+window.addEventListener('load', renderNavButton);
+
+
+// -------------------- REDIRECT TO SHOP PAGE --------------------
+const shopNowBtn = safeGetElement("shop-now");
+if (shopNowBtn) {
+    shopNowBtn.addEventListener("click", function() {
+        window.location.href = "/shop-now.html";
+    });
+}
+
+
+// -------------------- CONTACT FORM SUBMISSION --------------------
+const contactForm = safeGetElement('contactForm'); 
 if (contactForm) {
     contactForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // Safely get elements within the form listener
         const name = safeGetElement('name')?.value.trim();
         const email = safeGetElement('email')?.value.trim();
-        const phone = safeGetElement('phone')?.value.trim() || ''; // Added safe access and default
+        const phone = safeGetElement('phone')?.value.trim() || ''; 
         const message = safeGetElement('message')?.value.trim();
         const contactMsg = safeGetElement('contactMsg');
 
         if (!name || !email || !message) {
             if (contactMsg) {
                 contactMsg.style.color = "red";
-                contactMsg.textContent = "Please fill in all fields.";
+                contactMsg.textContent = "Please fill in all required fields.";
             }
             return;
         }
 
-        // POST data to backend
         fetch('/api/contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            // If phone doesn't exist on the page, it will send an empty string
             body: JSON.stringify({ name, email, phone, message }) 
         })
         .then(res => res.json())
@@ -127,7 +221,7 @@ if (contactForm) {
                 contactMsg.style.color = 'green';
                 contactMsg.textContent = 'Thank you for contacting us!';
             }
-            contactForm.reset(); // reset form after submission
+            contactForm.reset(); 
         })
         .catch(err => {
             console.error(err);
@@ -139,48 +233,76 @@ if (contactForm) {
     });
 }
 
+// -------------------- REGISTRATION PAGE LOGIC --------------------
+// Runs on register.html
+const registerForm = safeGetElement('registerForm');
 
-// -------------------- DROPDOWN --------------------
-// This uses querySelectorAll, which won't crash if nothing is found, so it's okay.
-function toggleDropdown(event) {
-    event.preventDefault();
-    const parent = event.target.closest(".dropdown");
-
-    document.querySelectorAll(".dropdown").forEach(d => {
-        if (d !== parent) d.classList.remove("open");
-    });
-
-    if (parent) parent.classList.toggle("open"); // Added check
-}
-
-document.addEventListener("click", function(e) {
-    if (!e.target.closest(".dropdown")) {
-        document.querySelectorAll(".dropdown").forEach(d => d.classList.remove("open"));
-    }
-});
-
-
-// -------------------- SELLER MODAL --------------------
-const sellerForm = safeGetElement('sellerForm');
-
-function openSeller() {
-    const sellerModal = safeGetElement('sellerModal');
-    if (sellerModal) sellerModal.style.display = 'flex';
-}
-
-function closeSeller() {
-    const sellerModal = safeGetElement('sellerModal');
-    const sellerMsg = safeGetElement('sellerMsg');
-    
-    if (sellerModal) sellerModal.style.display = 'none';
-    if (sellerMsg) sellerMsg.textContent = '';
-    if (sellerForm) sellerForm.reset();
-}
-
-if (sellerForm) { // Check if the form element exists
-    sellerForm.addEventListener('submit', function(e) {
+if (registerForm) {
+    registerForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
+        // Get and compare passwords
+        const name = safeGetElement('regName')?.value.trim();
+        const email = safeGetElement('regEmail')?.value.trim();
+        const password = safeGetElement('regPassword1')?.value.trim();
+        const confirmPassword = safeGetElement('regPassword2')?.value.trim();
+        const errorMsg = safeGetElement('regError');
+
+        if (password !== confirmPassword) {
+             if (errorMsg) {
+                errorMsg.style.color = "red";
+                errorMsg.textContent = "Passwords do not match!";
+            }
+            return;
+        }
+        
+        if (!name || !email || !password) {
+            if (errorMsg) {
+                errorMsg.style.color = "red";
+                errorMsg.textContent = "All fields are required.";
+            }
+            return;
+        }
+
+        fetch('/api/auth/register', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password }) 
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.token) {
+                errorMsg.style.color = "green";
+                errorMsg.textContent = "Registration successful! Redirecting to home...";
+                
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 1500);
+
+            } else {
+                errorMsg.style.color = "red";
+                errorMsg.textContent = data.message === 'User already exists' 
+                    ? "User already exists. Try logging in." 
+                    : data.message || "Registration failed.";
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            errorMsg.textContent = "Server error during Sign Up. Please try again.";
+        });
+    });
+}
+
+
+// -------------------- SELLER MODAL SUBMISSION --------------------
+const sellerForm = safeGetElement('sellerForm');
+if (sellerForm) { 
+    sellerForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        // ... (Your seller form submission logic) ...
         const name = safeGetElement('sellerName')?.value.trim();
         const email = safeGetElement('sellerEmail')?.value.trim();
         const phone = safeGetElement('sellerPhone')?.value.trim();
@@ -201,36 +323,17 @@ if (sellerForm) { // Check if the form element exists
             sellerMsg.textContent = "Thank you for registering as a seller!";
         }
         this.reset();
-
-        // Auto-close modal after 2 seconds
-        setTimeout(() => {
-            closeSeller();
-        }, 2000);
+        setTimeout(() => { closeSeller(); }, 2000);
     });
 }
 
 
-// -------------------- RE-SELL MODAL --------------------
+// -------------------- RE-SELL MODAL SUBMISSION --------------------
 const resellForm = safeGetElement('resellForm');
-
-function openResell() {
-    const resellModal = safeGetElement('resellModal');
-    if (resellModal) resellModal.style.display = 'flex';
-}
-
-function closeResell() {
-    const resellModal = safeGetElement('resellModal');
-    const resellMsg = safeGetElement('resellMsg');
-    
-    if (resellModal) resellModal.style.display = 'none';
-    if (resellMsg) resellMsg.textContent = '';
-    if (resellForm) resellForm.reset();
-}
-
-if (resellForm) { // Check if the form element exists
+if (resellForm) { 
     resellForm.addEventListener('submit', function(e) {
         e.preventDefault();
-
+        // ... (Your resell form submission logic) ...
         const name = safeGetElement('resellName')?.value.trim();
         const email = safeGetElement('resellEmail')?.value.trim();
         const phone = safeGetElement('resellPhone')?.value.trim();
@@ -251,18 +354,13 @@ if (resellForm) { // Check if the form element exists
             resellMsg.textContent = "Thank you for registering as a re-seller!";
         }
         this.reset();
-
-        // Auto-close modal after 2 seconds
-        setTimeout(() => {
-            closeResell();
-        }, 2000);
+        setTimeout(() => { closeResell(); }, 2000);
     });
 }
 
 
-// -------------------- NEWSLETTER --------------------
+// -------------------- NEWSLETTER SUBMISSION --------------------
 const newsletterForm = safeGetElement("newsletterForm");
-
 if (newsletterForm) {
     newsletterForm.addEventListener("submit", function(e) {
         e.preventDefault();
@@ -271,19 +369,13 @@ if (newsletterForm) {
         const newsletterMsg = safeGetElement("newsletterMsg");
 
         if (!emailInput.value.trim()) {
-            if (newsletterMsg) {
-                newsletterMsg.style.color = "red";
-                newsletterMsg.textContent = "Please enter your email.";
-            }
+            if (newsletterMsg) { newsletterMsg.style.color = "red"; newsletterMsg.textContent = "Please enter your email."; }
             return;
         }
 
         const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
         if (!emailInput.value.match(emailPattern)) {
-            if (newsletterMsg) {
-                newsletterMsg.style.color = "red";
-                newsletterMsg.textContent = "Please enter a valid email.";
-            }
+            if (newsletterMsg) { newsletterMsg.style.color = "red"; newsletterMsg.textContent = "Please enter a valid email."; }
             return;
         }
 
@@ -296,12 +388,12 @@ if (newsletterForm) {
 }
 
 // -------------------- SMOOTH SCROLL --------------------
-// Uses querySelectorAll, which won't crash if nothing is found, so it's okay.
+// This uses querySelectorAll, which is safe from crashing.
 document.querySelectorAll('a[href^="#about-section"]').forEach(anchor => {
     anchor.addEventListener("click", function(e) {
         e.preventDefault();
         const targetElement = document.querySelector(this.getAttribute("href"));
-        if (targetElement) { // Added safety check
+        if (targetElement) { 
             targetElement.scrollIntoView({
                 behavior: "smooth"
             });

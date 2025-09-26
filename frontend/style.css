@@ -322,6 +322,92 @@ body {
     margin-bottom: 10px;
 }
 
+/* =========================================================
+   REGISTRATION PAGE STYLES (register.html)
+   ========================================================= */
+
+/* 1. Container: Centers the entire form on the screen */
+.registration-container {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    min-height: 100vh; /* Use full viewport height */
+    padding-top: 50px; 
+    padding-bottom: 20px;
+    background-color: #ebe8e2; /* Matches body background */
+}
+
+/* 2. Form Card: Reuses the standard login modal card structure */
+.login-card {
+    /* These styles should already be defined in your main CSS but are included 
+       for context or if you separated them: */
+    background-color: #ECE3CE; /* Cream color */
+    padding: 30px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.login-card h3 {
+    color: #3A4D39; /* Dark green heading */
+    margin-bottom: 25px;
+}
+
+/* 3. Input Styling (Inherited and fine-tuned) */
+#registerForm input {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    outline: none;
+    font-size: 1rem;
+}
+
+/* 4. Button Styling */
+.login-card button.btn-green {
+    width: 100%;
+    margin-bottom: 10px;
+    /* Inherits colors from your main .btn-green: */
+    background-color: #3A4D39; 
+    color: #ECE3CE;
+    border: none;
+    padding: 12px;
+    border-radius: 25px;
+}
+
+.login-card button.btn-green:hover {
+    background-color: #4F6F52;
+}
+
+/* 5. Error Message Area */
+#regError {
+    text-align: left; 
+    font-size: 0.9rem;
+    padding: 5px 0;
+    margin-bottom: 15px; /* Ensures space below the error message */
+}
+
+/* 6. "Login here" Link Styling */
+.login-card p {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.login-card p a {
+    color: #4F6F52; /* Light green link color */
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-card p a:hover {
+    text-decoration: underline;
+    color: #3A4D39; /* Dark green on hover */
+}
+
 /* Contact Us Modal Styles */
 .contact-modal {
     position: fixed;
@@ -912,3 +998,66 @@ body {
         font-size: 0.9rem;
     }
 } */
+
+
+/* =========================================================
+   REGISTRATION PAGE STYLES (register.html)
+   ========================================================= */
+
+/* 1. Container: Centers the entire form on the screen */
+.registration-container {
+    display: flex;
+    justify-content: center; /* Center the card horizontally */
+    align-items: center; /* Center the card vertically */
+    min-height: 100vh; /* Use full viewport height */
+    padding-top: 50px; 
+    padding-bottom: 20px;
+}
+
+/* Ensure form elements occupy full width and have proper margin */
+.login-card h3 {
+    margin-bottom: 25px;
+}
+
+/* 2. Button Styling on Register Page */
+.login-card button.btn-green {
+    width: 100%;
+    margin-bottom: 10px;
+    /* Inherits colors from your main .btn-green */
+}
+
+/* 3. 'Login here' Link Styling */
+.login-card p {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.login-card p a {
+    color: #4F6F52; /* Light green link color */
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-card p a:hover {
+    text-decoration: underline;
+    color: #3A4D39; /* Dark green on hover */
+}
+
+
+/* =========================================================
+   DYNAMIC LOGIN/LOGOUT BUTTON STYLES (for openLogin() modal content)
+   ========================================================= */
+
+/* This targets the dynamically generated Log Out button inside the modal.
+   It ensures it looks like the primary action button. */
+.login-card button:not(.close-btn):not(.sign-in-btn) {
+    /* We exclude close-btn and sign-in-btn because they have their own styles. */
+    background-color: #3A4D39; /* Dark green */
+    color: #ECE3CE; /* Cream text */
+    /* Inherits padding and border-radius from general button styles */
+}
+
+.login-card button:hover:not(.close-btn):not(.sign-in-btn) {
+    background-color: #4F6F52; /* Light green hover */
+}
