@@ -16,25 +16,47 @@ function closeLogin() {
 }
 
 function validateModalLogin() {
-    const username = document.getElementById('modalUsername').value.trim();
+    const email = document.getElementById('modalUsername').value.trim(); // treat as email
     const password = document.getElementById('modalPassword').value.trim();
     const errorMsg = document.getElementById('modalError');
 
-    if (!username || !password) {
+    if (!email || !password) {
         errorMsg.style.color = "red";
-        errorMsg.textContent = "Please enter both username and password.";
+        errorMsg.textContent = "Please enter both email and password.";
         return;
     }
 
-    if (username === "user" && password === "password") {
-        errorMsg.style.color = "green";
-        errorMsg.textContent = "Login successful!";
-        // You can redirect or handle session here
-    } else {
+    // Make API call
+    fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.token) {
+            errorMsg.style.color = "green";
+            errorMsg.textContent = "Login successful!";
+
+            // Save token to localStorage for future requests
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+
+            // Redirect or close modal
+            closeLogin();
+            window.location.reload(); // optional, refresh to update UI
+        } else {
+            errorMsg.style.color = "red";
+            errorMsg.textContent = data.message || "Invalid credentials";
+        }
+    })
+    .catch(err => {
+        console.error(err);
         errorMsg.style.color = "red";
-        errorMsg.textContent = "Invalid username or password.";
-    }
+        errorMsg.textContent = "Server error, try again later.";
+    });
 }
+
 
 // -------------------- CONTACT MODAL --------------------
 // function openContact() {
