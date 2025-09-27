@@ -1,10 +1,33 @@
-/* === Shop Page Custom Styles === */
+/* === Saree Page Custom Styles (saree.css) === */
 
-/* Body */
-.shop-body {
-    background-color: #ebe8e2;
+/* --- GENERAL & UTILITY STYLES --- */
+* {
     font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
 }
+
+.shop-body {
+    background-color: #ebe8e2; /* Light cream/beige background */
+    padding-top: 100px; /* Space for fixed navbar */
+}
+
+/* Base button and color definitions for the page (using your palette) */
+.btn-green {
+    background-color: #4F6F52;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    color: #ECE3CE;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.btn-green:hover {
+    background-color: #3A4D39;
+}
+
+/* --- NAVBAR STYLES --- */
 
 .navbar {
     display: flex;
@@ -12,7 +35,7 @@
     align-items: center;
     height: 95px;
     width: 100%;
-    background-color:#4F6F52;
+    background-color: #4F6F52;
     border-bottom: 2px solid rgba(00,00,00,0.1);
     padding: 0 30px;
     position: fixed;
@@ -27,10 +50,6 @@
     width: 300px;
 }
 
-.nav-items {
-    align-self: flex-end;
-}
-
 .nav-items ul {
     display: flex;
     align-items: center;
@@ -40,7 +59,7 @@
 
 .nav-items a {
     text-decoration: none;
-    color:#ECE3CE;
+    color: #ECE3CE;
     font-size: 1.3rem;
     font-weight: 500;
 }
@@ -51,16 +70,203 @@
 }
 
 .cart {
-  position: relative;
-  font-size: 1.2rem;
-  color: #ECE3CE;
-  cursor: pointer;
-  transition: 0.3s;
-  font-weight: 700;
+    position: relative;
+    font-size: 1.2rem;
+    color: #ECE3CE;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: 700;
 }
 
 .cart:hover {
-  color:#3A4D39;
+    color: #3A4D39;
+}
+
+.login button {
+    height: 40px;
+    width: 80px;
+    border-radius: 90px;
+    border: none;
+    color: #ECE3CE;
+    background-color: #3A4D39;
+    font-size: 1.6rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.login button:hover {
+    background-color: #ECE3CE;
+    color: #3A4D39;
+}
+
+/* --- PAGE-SPECIFIC LAYOUT STYLES --- */
+
+/* Search Bar */
+.shop-search {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px 0;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.shop-search input {
+    width: 60%;
+    padding: 10px 15px;
+    border: 1px solid #739072;
+    border-radius: 8px;
+    outline: none;
+    font-size: 1rem;
+}
+
+.shop-search button {
+    background-color: #4F6F52;
+    color: #ECE3CE;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.shop-search button:hover {
+    background-color: #3A4D39;
+}
+
+/* Sidebar Filters */
+aside {
+    background-color: #f8f8f8 !important; 
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    height: fit-content;
+}
+
+aside h5 {
+    color: #3A4D39;
+    border-bottom: 2px solid #4F6F52;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+aside h6 {
+    color: #4F6F52;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+aside ul li {
+    font-size: 0.95rem;
+    list-style: none;
+    margin-bottom: 8px;
+}
+
+/* Product Cards */
+main .card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+}
+
+main .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+    height: 300px;
+    object-fit: cover;
+}
+
+.card-title {
+    color: #3A4D39;
+    font-weight: 600;
+}
+
+
+/* --- MODAL STYLES (Essential Base for Login/Seller Modals) --- */
+
+/* Common Modal Background Overlay */
+.login-modal, .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(58, 77, 57, 0.8); /* Semi-transparent dark green */
+    display: none; /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+/* Common Modal Card */
+.login-card, .modal-card {
+    background-color: #ECE3CE; /* Cream color */
+    padding: 30px;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.login-card h3, .modal-card h2 {
+    color: #3A4D39; /* Dark green text */
+    margin-bottom: 20px;
+}
+
+/* Form Inputs */
+.login-card input,
+.modal-card input,
+.modal-card textarea {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    font-size: 1rem;
+    outline: none;
+}
+
+/* Login/Sign In/Log Out Buttons */
+.login-card button,
+.modal-card button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.login-card button:not(.close-btn),
+.modal-card button:not(.close-btn) {
+    background-color: #3A4D39; 
+    color: #ECE3CE;
+}
+
+.login-card button.close-btn {
+    background-color: #ccc;
+    color: black;
+}
+
+.login-card button:hover:not(.close-btn),
+.modal-card button:hover:not(.close-btn) {
+    background-color: #4F6F52;
+}
+
+.login-card .error,
+.modal-message {
+    color: red;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
 }
 
 #cart-count {
@@ -74,117 +280,6 @@
   border-radius: 50%;
   padding: 2px 6px;
 }
-
-.login {
-    height: 40px;
-    width: 80px;
-    border-radius: 90px;
-    border: none;
-    color: #ECE3CE;
-    background-color:#3A4D39;
-    font-size: 1.6rem;
-    font-weight: 600;
-}
-
-.login:hover {
-    background-color:#ECE3CE;
-    color: #3A4D39;
-    height: 39px;
-} 
-
-/* Search Bar
-.shop-search {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
-.shop-search input {
-    width: 50%;
-    padding: 8px 12px;
-    border: 2px solid #739072;
-    border-radius: 6px;
-    outline: none;
-}
-
-.shop-search button {
-    background-color: #739072;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    color: white;
-    cursor: pointer;
-}
-
-.shop-search button:hover {
-    background-color: #557a55;
-}
-
-/* Sidebar Filters */
-/* aside {
-    font-size: 15px;
-}
-
-aside h5 {
-    border-bottom: 2px solid #4F6F52;
-    padding-bottom: 8px;
-    margin-bottom: 15px;
-}
-
-aside h6 {
-    color: #4F6F52;
-    margin-bottom: 8px;
-    font-weight: 600;
-}
-
-aside ul li {
-    margin-bottom: 6px;
-}
-
-/* Product Cards */
-/* .card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-}
-
-.btn-green {
-    background-color: #739072;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 5px;
-    color: white;
-    font-weight: 500;
-    transition: 0.3s;
-}
-
-.btn-green:hover {
-    background-color: #557a55;
-}
-
-/* Responsive Sidebar */
-/* @media (max-width: 768px) {
-    aside {
-        display: none;
-        margin-top: 15px;
-    }
-    aside.active {
-        display: block;
-    }
-    .filter-toggle {
-        display: block;
-        background-color: #739072;
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 5px;
-        margin-bottom: 10px;
-    }
-}  */
-
 
 /* footer */
 .site-footer {
