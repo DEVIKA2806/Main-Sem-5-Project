@@ -1061,3 +1061,94 @@ body {
 .login-card button:hover:not(.close-btn):not(.sign-in-btn) {
     background-color: #4F6F52; /* Light green hover */
 }
+
+/* =========================================================
+   SELLER DASHBOARD STYLES (seller-dashboard.html)
+   ========================================================= */
+
+.dashboard-container {
+    max-width: 600px;
+    /* Adjust margin-top to clear your fixed shop-navbar */
+    margin: 150px auto 50px auto; 
+    padding: 40px;
+    border-radius: 20px;
+    background-color: #ECE3CE; /* Cream background, matching your modals */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.dashboard-container h1 {
+    color: #3A4D39; /* Dark green heading */
+    margin-bottom: 5px;
+}
+
+.dashboard-container p {
+    color: #4F6F52;
+    margin-bottom: 25px;
+}
+
+.product-form label {
+    display: block;
+    text-align: left;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #3A4D39;
+}
+
+/* Styling for all form inputs and select element */
+.product-form input[type="text"], 
+.product-form input[type="number"], 
+.product-form textarea, 
+.product-form select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 25px; /* Ensures rounded inputs/select */
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+}
+
+.product-form textarea {
+    resize: vertical;
+    min-height: 100px;
+    border-radius: 15px; 
+}
+
+/* Styling the "Add Item" button */
+.product-form button {
+    background-color: #3A4D39; 
+    color: #ECE3CE;
+    padding: 15px 20px;
+    margin-top: 30px;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.product-form button:hover {
+     background-color: #4F6F52; 
+}
+
+/* Styling for the new "Already a Seller? Log In" button */
+.btn-seller-shortcut {
+    background-color: #b0b0b0 !important; 
+    color: white !important;
+    border: none !important;
+    padding: 12px !important;
+    margin-top: 10px !important;
+    font-size: 1rem !important;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 25px;
+    margin-bottom: 5px !important; 
+}
+
+.btn-seller-shortcut:hover {
+    background-color: #888888 !important;
+}

@@ -296,10 +296,12 @@ if (registerForm) {
 
 
 // -------------------- SELLER MODAL SUBMISSION --------------------
+// -------------------- SELLER MODAL SUBMISSION (MERN INTEGRATED) --------------------
 const sellerForm = safeGetElement('sellerForm');
 if (sellerForm) { 
     sellerForm.addEventListener('submit', function(e) {
         e.preventDefault();
+        
         const name = safeGetElement('sellerName')?.value.trim();
         const email = safeGetElement('sellerEmail')?.value.trim();
         const phone = safeGetElement('sellerPhone')?.value.trim();
@@ -307,14 +309,64 @@ if (sellerForm) {
         const products = safeGetElement('sellerProducts')?.value.trim();
         const sellerMsg = safeGetElement('sellerMsg');
 
+        // 1. Client-Side Validation
         if (!name || !email || !phone || !business || !products) {
             if (sellerMsg) { sellerMsg.style.color = "red"; sellerMsg.textContent = "Please fill in all fields."; }
             return;
         }
 
-        if (sellerMsg) { sellerMsg.style.color = "green"; sellerMsg.textContent = "Thank you for registering as a seller!"; }
+        if (sellerMsg) { 
+            sellerMsg.style.color = "orange"; 
+            sellerMsg.textContent = "Submitting application to server..."; 
+        }
+
+        // --- MERN Backend Fetch Call: /api/seller/register ---
+        fetch('/api/seller/register', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, phone, business, products })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.seller && data.seller._id) {
+                // SUCCESS: Registration saved to MongoDB
+                if (sellerMsg) { 
+                    sellerMsg.style.color = "green"; 
+                    sellerMsg.textContent = "Success! Redirecting to your dashboard..."; 
+                }
+                
+                // CRUCIAL STEP 1: Save the Seller ID returned by the backend
+                localStorage.setItem('currentSellerId', data.seller._id); 
+
+                setTimeout(() => { 
+                    closeSeller();
+                    // CRUCIAL STEP 2: Redirect to the product creation page
+                    window.location.href = 'seller-dashboard.html'; 
+                }, 1500);
+            } else {
+                if (sellerMsg) {
+                    sellerMsg.style.color = "red";
+                        
+                    // Check for the specific email conflict error from the backend
+                    if (data.message && data.message.includes('already registered')) {
+                        sellerMsg.innerHTML = `
+                            ${data.message}<br><br>
+                            <button class="btn-seller-login" onclick="closeSeller(); openLogin();">
+                                Click here to Login
+                            </button>`;
+                    } else {
+                        // Generic failure message
+                        sellerMsg.textContent = data.message || "Registration failed. Please try again.";
+                    }
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Seller registration fetch error:', err);
+            if (sellerMsg) { sellerMsg.style.color = "red"; sellerMsg.textContent = "Network error. Server unreachable."; }
+        });
+        
         this.reset();
-        setTimeout(() => { closeSeller(); }, 2000);
     });
 }
 
@@ -433,4 +485,3 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
-// -----------------------------------------------------------------

@@ -156,13 +156,19 @@
         <div class="modal-card">
             <h2>Join as Seller</h2>
             <form id="sellerForm">
-            <input type="text" id="sellerName" placeholder="Name" required>
-            <input type="email" id="sellerEmail" placeholder="Email" required>
-            <input type="tel" id="sellerPhone" placeholder="Phone" required>
-            <input type="text" id="sellerBusiness" placeholder="Business Name" required>
-            <textarea id="sellerProducts" placeholder="Products" required></textarea>
-            <button type="submit">Submit</button>
-            <button type="button" class="close-btn" onclick="closeSeller()">Close</button>
+                <input type="text" id="sellerName" placeholder="Name" required>
+                <input type="email" id="sellerEmail" placeholder="Email" required>
+                <input type="tel" id="sellerPhone" placeholder="Phone" required>
+                <input type="text" id="sellerBusiness" placeholder="Business Name" required>
+                <textarea id="sellerProducts" placeholder="Products" required></textarea>
+                
+                <button type="submit">Submit</button>
+                
+                <button type="button" class="btn-seller-shortcut" onclick="closeSeller(); openLogin();">
+                    Already a Seller? Log In
+                </button>
+
+                <button type="button" class="close-btn" onclick="closeSeller()">Close</button>
             </form>
             <div id="sellerMsg"></div>
         </div>
