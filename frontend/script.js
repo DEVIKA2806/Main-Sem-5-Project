@@ -2,7 +2,7 @@
 const safeGetElement = (id) => document.getElementById(id);
 
 // *****************************************************************
-// 1. GLOBAL FUNCTIONS (Defined at the top to prevent "ReferenceError")
+// 1. GLOBAL FUNCTIONS (MUST BE AT THE VERY TOP)
 // *****************************************************************
 
 // --- LOGIN/LOGOUT/MODAL FUNCTIONS ---
@@ -16,7 +16,7 @@ function openLogin() {
     const loginCard = loginModal.querySelector('.login-card');
 
     if (token && user) {
-        // User is logged in: Show SIGN OUT and Close options
+        // User is logged in: Show Log Out option
         loginCard.innerHTML = `
             <h3>Welcome Back, ${user.name}!</h3>
             <button onclick="logout()">Log Out</button>
@@ -24,7 +24,6 @@ function openLogin() {
         `;
     } else {
         // User is logged out: Restore LOGIN and SIGN IN form
-        // This is done by restoring the original static structure from index.html
         loginCard.innerHTML = `
             <h3>Login</h3>
             <input type="email" id="modalUsername" placeholder="Email" />
@@ -156,9 +155,9 @@ function renderNavButton() {
     const user = JSON.parse(localStorage.getItem('user'));
 
     if (token && user) {
-        // Logged In: Show Logout button with name
+        // Logged In: Show user icon (if you want text, you need to adjust CSS)
         container.innerHTML = `
-            <button class="btn-green login" onclick="openLogin()">
+            <button class="login logged-in" onclick="openLogin()">
                 <i class="fa-solid fa-user"></i>
             </button>
         `;
@@ -234,14 +233,13 @@ if (contactForm) {
 }
 
 // -------------------- REGISTRATION PAGE LOGIC --------------------
-// Runs on register.html
 const registerForm = safeGetElement('registerForm');
 
 if (registerForm) {
     registerForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // Get and compare passwords
+        // Get and compare passwords (from regPassword1 and regPassword2 in register.html)
         const name = safeGetElement('regName')?.value.trim();
         const email = safeGetElement('regEmail')?.value.trim();
         const password = safeGetElement('regPassword1')?.value.trim();
@@ -302,7 +300,6 @@ const sellerForm = safeGetElement('sellerForm');
 if (sellerForm) { 
     sellerForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        // ... (Your seller form submission logic) ...
         const name = safeGetElement('sellerName')?.value.trim();
         const email = safeGetElement('sellerEmail')?.value.trim();
         const phone = safeGetElement('sellerPhone')?.value.trim();
@@ -311,17 +308,11 @@ if (sellerForm) {
         const sellerMsg = safeGetElement('sellerMsg');
 
         if (!name || !email || !phone || !business || !products) {
-            if (sellerMsg) {
-                sellerMsg.style.color = "red";
-                sellerMsg.textContent = "Please fill in all fields.";
-            }
+            if (sellerMsg) { sellerMsg.style.color = "red"; sellerMsg.textContent = "Please fill in all fields."; }
             return;
         }
 
-        if (sellerMsg) {
-            sellerMsg.style.color = "green";
-            sellerMsg.textContent = "Thank you for registering as a seller!";
-        }
+        if (sellerMsg) { sellerMsg.style.color = "green"; sellerMsg.textContent = "Thank you for registering as a seller!"; }
         this.reset();
         setTimeout(() => { closeSeller(); }, 2000);
     });
@@ -333,7 +324,6 @@ const resellForm = safeGetElement('resellForm');
 if (resellForm) { 
     resellForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        // ... (Your resell form submission logic) ...
         const name = safeGetElement('resellName')?.value.trim();
         const email = safeGetElement('resellEmail')?.value.trim();
         const phone = safeGetElement('resellPhone')?.value.trim();
@@ -342,17 +332,11 @@ if (resellForm) {
         const resellMsg = safeGetElement('resellMsg');
 
         if (!name || !email || !phone || !business || !products) {
-            if (resellMsg) {
-                resellMsg.style.color = "red";
-                resellMsg.textContent = "Please fill in all fields.";
-            }
+            if (resellMsg) { resellMsg.style.color = "red"; resellMsg.textContent = "Please fill in all fields."; }
             return;
         }
 
-        if (resellMsg) {
-            resellMsg.style.color = "green";
-            resellMsg.textContent = "Thank you for registering as a re-seller!";
-        }
+        if (resellMsg) { resellMsg.style.color = "green"; resellMsg.textContent = "Thank you for registering as a re-seller!"; }
         this.reset();
         setTimeout(() => { closeResell(); }, 2000);
     });
@@ -388,7 +372,6 @@ if (newsletterForm) {
 }
 
 // -------------------- SMOOTH SCROLL --------------------
-// This uses querySelectorAll, which is safe from crashing.
 document.querySelectorAll('a[href^="#about-section"]').forEach(anchor => {
     anchor.addEventListener("click", function(e) {
         e.preventDefault();
@@ -400,3 +383,54 @@ document.querySelectorAll('a[href^="#about-section"]').forEach(anchor => {
         }
     });
 });
+
+
+// --- In your main script.js file (at the bottom) ---
+
+// -------------------- SAREE PAGE LOGIC (Moved from saree.js) --------------------
+
+// Toggle sidebar filters (for mobile)
+document.addEventListener("DOMContentLoaded", () => {
+    // Check if the container exists (i.e., if we are on the saree.html page)
+    const container = document.querySelector(".container-fluid .row");
+    if (!container) return; // Exit if not on the product page
+
+    const filterBtn = document.createElement("button");
+    filterBtn.classList.add("filter-toggle");
+    filterBtn.innerText = "Toggle Filters";
+
+    const sidebar = container.querySelector("aside");
+
+    if (sidebar) { // Check if sidebar exists
+        // Insert filter button before sidebar
+        sidebar.parentNode.insertBefore(filterBtn, sidebar);
+
+        filterBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("active");
+        });
+    }
+});
+
+// Simple search filter
+document.addEventListener("DOMContentLoaded", () => {
+    const searchInput = document.querySelector(".shop-search input");
+    const productCards = document.querySelectorAll(".card");
+
+    if (searchInput) { // Check if search bar exists (i.e., if we are on the shop page)
+        searchInput.addEventListener("input", () => {
+            const query = searchInput.value.toLowerCase();
+            productCards.forEach(card => {
+                const titleElement = card.querySelector(".card-title");
+                if (!titleElement) return;
+
+                const title = titleElement.innerText.toLowerCase();
+                if (title.includes(query)) {
+                    card.parentElement.style.display = "block";
+                } else {
+                    card.parentElement.style.display = "none";
+                }
+            });
+        });
+    }
+});
+// -----------------------------------------------------------------

@@ -18,9 +18,11 @@
             <ul>
                 <li><a href="index.html">Home</a></li>
                 <li>|</li>
-                <li><a href="#">Items</a></li>
+                <li><a href="shop-now.html">Items</a></li>
                 <li>|</li>
-                <li><a href="contact.html" onclick="openContact()">Contact Us</a></li>
+                <li><a href="about.html">About Us</a></li>
+                <li>|</li>
+                <li><a href="contact.html">Contact Us</a></li>
                 <li>|</li>
                 <li><a href="#">Featured</a></li>
             </ul>
@@ -32,7 +34,7 @@
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span id="cart-count">0</span>
             </div>
-            <div class="login">
+            <div class="login" id="navLoginContainer">
                 <button class="login" onclick="openLogin()"><i class="fa-solid fa-user"></i></button>
             </div>
             <div class="sell-btn">
@@ -135,7 +137,18 @@
         </div>
     </div>
 
-    <!-- Seller Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-card">
+            <h3>Login</h3>
+            <input type="email" id="modalUsername" placeholder="Email" />
+            <input type="password" id="modalPassword" placeholder="Password" />
+            <div id="modalError" class="error"></div>
+            <button onclick="validateModalLogin()">Login</button>
+            <button class="sign-in-btn" onclick="window.location.href='register.html'; closeLogin()">Sign In</button>
+            <button class="close-btn" onclick="closeLogin()">Close</button>
+        </div>
+    </div>
+
     <div id="sellerModal" class="modal">
         <div class="modal-card">
             <h2>Join as Seller</h2>
@@ -152,11 +165,8 @@
         </div>
     </div>
 
-    <!-- footer -->
     <footer class="site-footer">
         <div class="footer-container">
-
-            <!-- About Us -->
             <div class="footer-section">
             <h3>About Us</h3>
             <p>We aim to connect sellers and buyers through a simple and elegant platform. 
@@ -164,7 +174,6 @@
             </p>
             </div>
 
-            <!-- Quick Links -->
             <div class="footer-section">
             <h3>Quick Links</h3>
             <ul>
@@ -175,7 +184,6 @@
             </ul>
             </div>
 
-            <!-- Newsletter -->
             <div class="footer-section">
             <h3>Stay Updated</h3>
             <form id="newsletterForm">
@@ -185,7 +193,6 @@
             </form>
             </div>
 
-            <!-- Social -->
             <div class="footer-section">
             <h3>Follow Us</h3>
             <div class="social-links">
@@ -194,14 +201,12 @@
                 <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
             </div>
             </div>
-
         </div>
 
         <div class="footer-bottom">
             <p>© 2025 Hand2Heart. All rights reserved.</p>
         </div>
     </footer>
-
 
     <script src="script.js"></script>
 </body>
