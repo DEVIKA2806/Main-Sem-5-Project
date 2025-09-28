@@ -1,18 +1,27 @@
+// Function to safely get an element and prevent errors if it doesn't exist
 const safeGetElement = (id) => document.getElementById(id);
 const BACKEND_URL = ''; 
 
 // *****************************************************************
-// 1. GLOBAL STATE AND HELPER FUNCTIONS
+// 1. GLOBAL STATE AND CART FUNCTIONS (UPDATED FOR DEDICATED PAGE)
 // *****************************************************************
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-// Helper to retrieve user data safely and set default role (Fixes 'role: undefined' issue on page reload)
+function updateCartCount() {
+    const countElement = safeGetElement('cart-count');
+    if (countElement) {
+        // Count total unique items
+        countElement.textContent = cart.length; 
+    }
+}
+
+// Helper to retrieve user data safely and set default role for legacy accounts
 function getLoggedInUser() {
     const user = JSON.parse(localStorage.getItem('user'));
     const token = localStorage.getItem('token');
     
     if (token && user && !user.role) {
-        // Assume 'user' role if a token exists but role is missing (for legacy accounts)
+        // CRITICAL FIX: Assume 'user' role if logged in but role is missing
         user.role = 'user';
     }
     
@@ -20,17 +29,10 @@ function getLoggedInUser() {
 }
 
 
-function updateCartCount() {
-    const countElement = safeGetElement('cart-count');
-    if (countElement) {
-        countElement.textContent = cart.length;
-    }
-}
-
 function addToCart(productId, title, price, imageUrl) {
     const user = getLoggedInUser(); 
     
-    if (!user || user.role !== 'user') { // Restrict cart to standard users
+    if (!user || user.role !== 'user') { // Check if logged in as a standard user
         alert('You must be logged in as a standard customer to add items to the cart.');
         openLogin();
         return;
@@ -56,44 +58,92 @@ function addToCart(productId, title, price, imageUrl) {
     alert(`Added ${title} to cart! Total unique items: ${cart.length}`);
 }
 
-function renderCartModal() {
-    const cartModal = safeGetElement('cartModal');
-    if (!cartModal) return; 
 
-    const cartContent = cart.map(item => `
-        <div class="cart-item">
-            <p class="cart-item-title">${item.title} (${item.qty} x ₹${item.price.toFixed(2)})</p>
-            <p class="cart-item-price">₹${(item.qty * item.price).toFixed(2)}</p>
-        </div>
-    `).join('');
+// NEW FUNCTION: Renders the content of cart.html
+function renderCartPage() {
+    const cartItemsList = safeGetElement('cartItemsList');
+    const cartSummary = safeGetElement('cartSummary');
+    const cartEmptyMessage = safeGetElement('cartEmptyMessage');
+    const cartSubtotal = safeGetElement('cartSubtotal');
+    
+    // Safety check to ensure we are on the cart.html page
+    if (!cartItemsList || !cartSummary) return;
 
-    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    if (cart.length === 0) {
+        cartItemsList.innerHTML = '';
+        cartSummary.style.display = 'none';
+        cartEmptyMessage.style.display = 'block';
+        return;
+    }
 
-    cartModal.querySelector('.modal-card').innerHTML = `
-        <h2>Your Cart</h2>
-        <div class="cart-items-list">
-            ${cart.length > 0 ? cartContent : '<p style="text-align: center; color: #6C757D;">Your cart is empty.</p>'}
-        </div>
-        <div class="cart-total">
-            <strong>Total:</strong> ₹${total.toFixed(2)}
-        </div>
-        ${cart.length > 0 ? '<button onclick="alert(\'This feature is a future goal! Thank you for testing.\')">Proceed to Checkout</button>' : ''}
-        <button class="close-btn" onclick="closeCart()">Close</button>
-    `;
-    cartModal.style.display = 'flex';
+    cartEmptyMessage.style.display = 'none';
+    cartSummary.style.display = 'flex';
+
+    let total = 0;
+    
+    const cartContent = cart.map(item => {
+        const subtotal = item.qty * item.price;
+        total += subtotal;
+        
+        return `
+            <div class="cart-item" data-product-id="${item.productId}">
+                <div class="cart-item-details">
+                    <img src="${item.imageUrl || '../assets/default.jpg'}" alt="${item.title}" class="cart-item-image">
+                    <p class="item-title">${item.title} <span style="font-size:0.8em; color:#666;">(₹${item.price.toFixed(2)} each)</span></p>
+                </div>
+                
+                <div class="item-qty-control">
+                    <button onclick="changeQuantity('${item.productId}', -1)" class="btn btn-sm btn-outline-secondary">-</button>
+                    <input type="number" value="${item.qty}" min="1" readonly>
+                    <button onclick="changeQuantity('${item.productId}', 1)" class="btn btn-sm btn-outline-secondary">+</button>
+                </div>
+                
+                <p class="item-price">₹${subtotal.toFixed(2)}</p>
+                
+                <button class="remove-btn" onclick="removeItem('${item.productId}')">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        `;
+    }).join('');
+
+    cartItemsList.innerHTML = cartContent;
+    if (cartSubtotal) cartSubtotal.textContent = `₹${total.toFixed(2)}`;
+    updateCartCount();
 }
 
-function closeCart() {
-    const cartModal = safeGetElement('cartModal');
-    if (cartModal) cartModal.style.display = 'none';
+function changeQuantity(productId, delta) {
+    const itemIndex = cart.findIndex(item => item.productId === productId);
+    if (itemIndex > -1) {
+        cart[itemIndex].qty += delta;
+        
+        if (cart[itemIndex].qty <= 0) {
+            // Remove the item if quantity drops to 0 or less
+            removeItem(productId);
+        } else {
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCartPage(); // Re-render the page
+        }
+    }
 }
+
+function removeItem(productId) {
+    // Finds item index, removes exactly one item at that index
+    const itemIndex = cart.findIndex(item => item.productId === productId);
+    
+    if (itemIndex > -1) {
+        cart.splice(itemIndex, 1); 
+        localStorage.setItem('cart', JSON.stringify(cart));
+        renderCartPage(); // Re-render the page
+    }
+}
+
 
 // *****************************************************************
 // 2. AUTH & MODAL FUNCTIONS
 // *****************************************************************
 
-// --- USER LOGIN/LOGOUT ---
-
+// --- USER LOGIN (Modified for dynamic content & robust role check) ---
 function openLogin() {
     const loginModal = safeGetElement('loginModal');
     if (!loginModal) return;
@@ -126,22 +176,6 @@ function openLogin() {
     loginModal.style.display = 'flex';
 }
 
-function closeLogin() {
-    const loginModal = safeGetElement('loginModal');
-    if (loginModal) loginModal.style.display = 'none';
-    const errorMsg = safeGetElement('modalError');
-    if (errorMsg) errorMsg.textContent = '';
-}
-
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('currentSellerId'); 
-    localStorage.removeItem('cart');
-    cart = [];
-    window.location.reload(); 
-}
-
 function validateModalLogin() {
     const emailInput = safeGetElement('modalUsername');
     const passwordInput = safeGetElement('modalPassword');
@@ -168,7 +202,7 @@ function validateModalLogin() {
     })
     .then(res => res.json())
     .then(data => {
-        if (data.token && data.user.role === 'user') {
+        if (data.token) {
             errorMsg.style.color = "green";
             errorMsg.textContent = "Login successful!";
 
@@ -178,7 +212,7 @@ function validateModalLogin() {
             closeLogin();
             window.location.reload(); 
         } 
-        // FIX: Provide explicit message for role/portal mismatch instead of generic "Invalid credentials"
+        // FIX: Check for explicit seller portal error message
         else if (data.message && data.message.includes('incorrect login portal')) {
             errorMsg.style.color = "red";
             errorMsg.textContent = "This account is registered as a Seller/Admin. Please use the 'Join as Seller' link and choose 'Already a Seller? Log In'.";
@@ -195,10 +229,10 @@ function validateModalLogin() {
     });
 }
 
-
-// --- SELLER LOGIN/REGISTRATION ---
+// --- SELLER LOGIN/REGISTRATION (New Dedicated Flow) ---
 
 function openSellerLogin() {
+    // Renders the dedicated Seller Login form inside the sellerModal
     const sellerModal = safeGetElement('sellerModal');
     const modalCard = sellerModal.querySelector('.modal-card');
     
@@ -211,7 +245,7 @@ function openSellerLogin() {
             
             <button onclick="validateSellerLogin()">Login</button>
             
-            <button type="button" class="btn-seller-shortcut" onclick="closeSeller(); openSeller();">
+            <button type="button" class="btn-seller-shortcut" onclick="openSeller()">
                 Need to Register?
             </button>
         </div>
@@ -254,7 +288,7 @@ function validateSellerLogin() {
                 window.location.href = 'seller-dashboard.html'; 
             }, 500);
 
-        } else if (data.message && data.message.includes('Seller access pending review')) {
+        } else if (data.message && data.message.includes('pending review')) {
              errorMsg.style.color = 'red';
              errorMsg.textContent = data.message;
         } else {
@@ -283,7 +317,7 @@ function openSeller() {
             <input type="email" id="sellerEmail" placeholder="Email" required>
             <input type="tel" id="sellerPhone" placeholder="Phone" required>
             <input type="text" id="sellerBusiness" placeholder="Business Name" required>
-            <textarea id="sellerProducts" placeholder="Products" required></textarea>
+            <textarea id="sellerProducts" placeholder="Products (e.g., Saree, Art, etc.)" required></textarea>
             <input type="password" id="sellerPassword" placeholder="Create Password" required>
             
             <button type="submit" id="sellerRegisterBtn">Register</button>
@@ -324,13 +358,6 @@ function openSeller() {
     sellerModal.style.display = 'flex';
 }
 
-function closeSeller() {
-    const sellerModal = safeGetElement('sellerModal');
-    if (sellerModal) sellerModal.style.display = 'none';
-    const sellerMsg = safeGetElement('sellerMsg');
-    if (sellerMsg) sellerMsg.textContent = '';
-}
-
 function handleSellerRegistration(e) {
     e.preventDefault();
         
@@ -362,7 +389,7 @@ function handleSellerRegistration(e) {
         if (data.seller && data.userId) {
             if (sellerMsg) { 
                 sellerMsg.style.color = "green"; 
-                sellerMsg.textContent = "Success! Your application is pending review. Redirecting to dashboard..."; 
+                sellerMsg.textContent = data.message; 
             }
             
             localStorage.setItem('currentSellerId', data.seller._id); 
@@ -390,6 +417,13 @@ function handleSellerRegistration(e) {
         console.error('Seller registration fetch error:', err);
         if (sellerMsg) { sellerMsg.style.color = "red"; sellerMsg.textContent = "Network error. Server unreachable."; }
     });
+}
+
+function closeSeller() {
+    const sellerModal = safeGetElement('sellerModal');
+    if (sellerModal) sellerModal.style.display = 'none';
+    const sellerMsg = safeGetElement('sellerMsg');
+    if (sellerMsg) sellerMsg.textContent = '';
 }
 
 
@@ -470,18 +504,14 @@ function renderNavButton() {
 
 window.addEventListener('load', renderNavButton);
 
-
-// -------------------- CART ICON LISTENER --------------------
-document.addEventListener('DOMContentLoaded', () => {
-    const cartIcon = document.querySelector('.nav-right .cart');
-    if (cartIcon) {
-        cartIcon.addEventListener('click', renderCartModal);
-    }
-});
-
-
 // -------------------- ADD TO CART BUTTONS --------------------
 document.addEventListener('DOMContentLoaded', () => {
+    // Only run renderCartPage logic on cart.html
+    if (window.location.pathname.endsWith('cart.html')) {
+        renderCartPage();
+    }
+    
+    // Find Add to Cart buttons on product pages (like saree.html)
     const productListings = document.querySelectorAll('.main-content .col, .shop-item .item');
 
     productListings.forEach(listing => {
@@ -495,10 +525,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!container) return;
 
                 const titleElement = container.querySelector('.card-title') || container.querySelector('p:not(.fw-bold)');
-                const priceElement = container.querySelector('.fw-bold') || container.querySelector('.card-text:last-of-type'); 
+                // Use a generic selector that finds the price text node
+                const priceElement = container.querySelector('.fw-bold') || container.querySelector('p:not(.card-text):not(:first-child)'); 
                 const imageElement = container.querySelector('img');
 
                 const title = titleElement?.textContent.trim() || 'Untitled Product';
+                // CRITICAL FIX: Strip non-numeric/non-dot/non-comma characters for robust price extraction
                 const priceText = priceElement?.textContent.replace(/[^0-9.]/g, '').trim(); 
                 const price = priceText ? parseFloat(priceText) : NaN;
                 
@@ -518,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// -------------------- REDIRECT TO SHOP PAGE --------------------
+// -------------------- INITIAL ATTACHMENTS --------------------
 const shopNowBtn = safeGetElement("shop-now");
 if (shopNowBtn) {
     shopNowBtn.addEventListener("click", function() {
@@ -526,6 +558,11 @@ if (shopNowBtn) {
     });
 }
 
+// Attach listener to initial seller registration form on shop-now.html
+const initialSellerForm = safeGetElement('sellerForm');
+if (initialSellerForm) {
+    initialSellerForm.addEventListener('submit', handleSellerRegistration);
+}
 
 // -------------------- CONTACT FORM SUBMISSION --------------------
 const contactForm = safeGetElement('contactForm'); 
@@ -619,9 +656,7 @@ if (registerForm) {
 
             } else {
                 errorMsg.style.color = "red";
-                errorMsg.textContent = data.message === 'User already exists' 
-                    ? "User already exists. Try logging in." 
-                    : data.message || "Registration failed.";
+                errorMsg.textContent = data.message || "Registration failed.";
             }
         })
         .catch(err => {
@@ -629,13 +664,6 @@ if (registerForm) {
             errorMsg.textContent = "Server error during Sign Up. Please try again.";
         });
     });
-}
-
-
-// -------------------- SELLER MODAL SUBMISSION (MERN INTEGRATED) --------------------
-const initialSellerForm = safeGetElement('sellerForm');
-if (initialSellerForm) {
-    initialSellerForm.addEventListener('submit', handleSellerRegistration);
 }
 
 

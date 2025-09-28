@@ -63,7 +63,7 @@ router.post('/add', async (req, res) => {
         return res.status(400).json({ message: 'Missing or invalid product details (Name, Price, Category).' });
     }
 
-    // 2. Price Range Validation (NEW LOGIC)
+    // 2. Price Range Validation (REQUIRED LOGIC)
     let minPrice, maxPrice;
     switch (category) {
         case 'saree':
@@ -78,15 +78,15 @@ router.post('/add', async (req, res) => {
             minPrice = 10;
             maxPrice = 1000;
             break;
+        case 'other': // Handled by default, assuming other categories have no strict range
         default:
-            // Allow 'other' category or bypass check
             minPrice = 0;
             maxPrice = Number.MAX_SAFE_INTEGER;
     }
 
     if (numericPrice < minPrice || numericPrice > maxPrice) {
         return res.status(400).json({ 
-            message: `The price of ₹${numericPrice} is outside the allowed range (₹${minPrice}-₹${maxPrice}) for the "${category}" category.` 
+            message: `The price of ₹${numericPrice.toFixed(2)} is outside the allowed range (₹${minPrice}-₹${maxPrice}) for the "${category}" category.` 
         });
     }
 
@@ -103,7 +103,7 @@ router.post('/add', async (req, res) => {
         const savedProduct = await newProduct.save();
 
         res.status(201).json({ 
-            message: `Product "${productName}" successfully added!`, 
+            message: `Product "${productName}" successfully added to the "${category}" collection!`, 
             product: savedProduct 
         });
 

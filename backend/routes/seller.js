@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const Seller = require('../models/Seller'); // Import the new Seller Model
-const User = require('../models/User'); // Import the User Model
-const bcrypt = require('bcryptjs'); // For hashing the password
+const Seller = require('../models/Seller');
+const User = require('../models/User'); // NEW
+const bcrypt = require('bcryptjs'); // NEW
 
-// POST /api/seller/register
+// POST /api/seller/register - Seller Registration (Creates User account + Seller application)
 router.post('/register', async (req, res) => {
-    // Added 'password'
+    // Added 'password' field from the frontend form
     const { name, email, phone, business, products, password } = req.body; 
 
     // 1. Basic validation
@@ -18,10 +18,9 @@ router.post('/register', async (req, res) => {
         // 2. Check for existing entries (User account first)
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            // This is crucial for the frontend logic to distinguish.
-            const message = existingUser.role === 'seller' 
-                ? 'This email is already registered as a seller. Please login.'
-                : 'This email is already registered as a standard user. Please login to your standard account first.' 
+            const message = existingUser.role === 'seller'
+                ? 'This email is already registered as a seller. Please log in.'
+                : 'This email is already registered as a standard user. Please log out first to proceed with seller registration.' 
             return res.status(409).json({ message });
         }
         
@@ -43,11 +42,11 @@ router.post('/register', async (req, res) => {
 
         const savedSeller = await newSeller.save();
         
-        // 5. Return success and the user/seller IDs
+        // 5. Return success message and the crucial sellerId
         res.status(201).json({ 
-            message: 'Seller application submitted successfully! Redirecting to dashboard.', 
+            message: 'Seller application submitted successfully! Your account will be reviewed.', 
             seller: savedSeller,
-            userId: newUser._id
+            userId: newUser._id // This is used to maintain local session state if necessary
         });
 
     } catch (error) {

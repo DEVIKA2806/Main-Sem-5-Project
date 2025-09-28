@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const Seller = require('../models/Seller'); 
+const Seller = require('../models/Seller'); // Added Seller model import
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
@@ -13,8 +13,8 @@ router.post('/register', async (req, res) => {
     const existing = await User.findOne({ email });
     if (existing) {
         let message = 'User already exists';
-        if (existing.role === 'seller' || existing.role === 'admin') {
-            message = 'This email is already registered as a seller or admin. Please use the appropriate login portal.';
+        if (existing.role !== 'user') {
+            message = 'This email is already registered under a different portal. Please log in through the correct portal or use a different email.';
         }
         return res.status(409).json({ message });
     }
@@ -26,8 +26,9 @@ router.post('/register', async (req, res) => {
     const user = new User({ name, email, passwordHash, role: 'user' });
     await user.save();
 
-    // Ensures role is included in the token and user object for client-side storage (Fixes role: undefined on registration)
     const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    
+    // Ensures role is included in the returned user object for correct client-side storage
     res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } }); 
   } catch (err) {
     console.error(err);
@@ -40,16 +41,17 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!user) return res.status(401).json({ message: 'Invalid credentials. Please check your email and password.' });
 
     // Enforces separation: blocks non-'user' roles from this endpoint
     if (user.role !== 'user') return res.status(401).json({ message: 'Invalid credentials or incorrect login portal. Please use the seller login if applicable.' });
 
     const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!valid) return res.status(401).json({ message: 'Invalid credentials. Please check your email and password.' });
 
     const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    // Ensures role is consistently returned (Fixes role: undefined on older login accounts)
+    
+    // Ensures role is consistently returned
     res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
   } catch (err) {
     console.error(err);
@@ -57,20 +59,20 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// 2. DEDICATED SELLER LOGIN (Used by the seller portal)
+// 2. DEDICATED SELLER LOGIN
 router.post('/seller-login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+        if (!user) return res.status(401).json({ message: 'Invalid credentials. Seller not registered.' });
 
         // Ensure the user has the 'seller' or 'admin' role
         if (user.role !== 'seller' && user.role !== 'admin') {
-            return res.status(401).json({ message: 'Invalid credentials or you are not registered as a seller.' });
+            return res.status(401).json({ message: 'Invalid credentials or you are not registered as a seller. Please use the customer login.' });
         }
 
         const valid = await bcrypt.compare(password, user.passwordHash);
-        if (!valid) return res.status(401).json({ message: 'Invalid credentials' });
+        if (!valid) return res.status(401).json({ message: 'Invalid credentials. Please check your email and password.' });
         
         // After user authentication, check seller application status
         const sellerInfo = await Seller.findOne({ email });
@@ -79,11 +81,11 @@ router.post('/seller-login', async (req, res) => {
         if (!sellerInfo || sellerInfo.status !== 'active') {
             return res.status(403).json({ 
                 message: `Seller access pending review. Current status: ${sellerInfo ? sellerInfo.status : 'Pending Registration Completion.'}`,
-                sellerInfo: sellerInfo || { _id: user._id } 
+                sellerInfo: sellerInfo || { _id: user._id }
             });
         }
         
-        // All good: generate token and return user/seller data
+        // All good: generate token and return user/seller data including sellerId
         const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
         res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role, sellerId: sellerInfo._id } });
 
