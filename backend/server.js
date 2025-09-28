@@ -8,17 +8,16 @@ const bodyParser = require('body-parser');
 
 // 1. IMPORT ALL ROUTES (Existing and New)
 const authRoutes = require('./routes/auth');
-const productRoutes = require('./routes/products'); // Renamed from products to product (see note)
+const productRoutes = require('./routes/products'); // Existing Product CRUD
 const orderRoutes = require('./routes/orders');
 const contactRoutes = require('./routes/contact');
 const sellerRoutes = require('./routes/seller'); // <-- NEW: Seller Registration
-const productAddRoutes = require('./routes/product'); // <-- NEW: Seller Product Add (Use a unique name here if productRoutes is for generic CRUD)
+// const productAddRoutes = require('./routes/product'); // <-- CORRECTED: Module not found error. This line is temporarily commented out.
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // --- MIDDLEWARE ---
-// Use CORS middleware (your current setup is fine since it allows all origins for simplicity)
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -44,7 +43,7 @@ app.use('/api/products', productRoutes);
 
 // NEW SELLER ROUTES
 app.use('/api/seller', sellerRoutes); // Handles POST /api/seller/register
-app.use('/api/product', productAddRoutes); // Handles POST /api/product/add
+// app.use('/api/product', productAddRoutes); // <-- CORRECTED: Corresponding app.use is commented out.
 
 // Serve static frontend files
 const FRONTEND_DIR = path.join(__dirname, '../frontend');
