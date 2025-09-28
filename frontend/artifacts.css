@@ -162,7 +162,7 @@
           .card {
               align-items: center;
               border-radius: 1rem;
-              height: 500px;
+              height: 600px;
               width: 350px;
               padding: 1rem;
               box-shadow: 0 2px 5px rgba(0, 0, 0, 0.50);
@@ -177,7 +177,7 @@
           }
           
           .card img {
-              height: 250px;
+              height: 350px;
               width: 100%;
               border-radius: 0.8rem;
           }
