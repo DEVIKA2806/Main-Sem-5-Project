@@ -45,30 +45,59 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
+// ... existing imports ...
+const mongoose = require('mongoose'); 
+
+// ... existing routes (/ and /) ...
+
 // NEW ROUTE: POST /api/product/add - Dedicated route for the Seller Dashboard
-// This is cleaner for the public facing seller flow, which might not use the standard 'auth' middleware
-// that your admin uses, although it SHOULD still validate the seller's identity.
 router.post('/add', async (req, res) => {
-    // Data extraction from the frontend form submission
     const { sellerId, productName, description, price, category } = req.body; 
+    const numericPrice = parseFloat(price);
 
     // 1. Basic Validation
     if (!sellerId || !mongoose.Types.ObjectId.isValid(sellerId)) {
         return res.status(401).json({ message: 'Authentication required: Invalid Seller ID format.' });
     }
-    if (!productName || !price || !category) {
-        return res.status(400).json({ message: 'Missing product details (Name, Price, Category).' });
+    if (!productName || !price || !category || isNaN(numericPrice) || numericPrice <= 0) {
+        return res.status(400).json({ message: 'Missing or invalid product details (Name, Price, Category).' });
+    }
+
+    // 2. Price Range Validation (NEW LOGIC)
+    let minPrice, maxPrice;
+    switch (category) {
+        case 'saree':
+            minPrice = 1000;
+            maxPrice = 8000;
+            break;
+        case 'artifacts':
+            minPrice = 200;
+            maxPrice = 5000;
+            break;
+        case 'lifestyle':
+            minPrice = 10;
+            maxPrice = 1000;
+            break;
+        default:
+            // Allow 'other' category or bypass check
+            minPrice = 0;
+            maxPrice = Number.MAX_SAFE_INTEGER;
+    }
+
+    if (numericPrice < minPrice || numericPrice > maxPrice) {
+        return res.status(400).json({ 
+            message: `The price of ₹${numericPrice} is outside the allowed range (₹${minPrice}-₹${maxPrice}) for the "${category}" category.` 
+        });
     }
 
     try {
-        // 2. Create new product entry
+        // 3. Create new product entry
         const newProduct = new Product({
             sellerId,
-            title: productName, // Map frontend field to MongoDB field
+            title: productName, 
             description,
-            price,
+            price: numericPrice, 
             category
-            // imageUrl and stock are optional here, as they are not in the seller form
         });
 
         const savedProduct = await newProduct.save();

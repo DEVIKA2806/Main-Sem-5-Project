@@ -32,7 +32,7 @@
             <div class="shop-search">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </div>
-            <div class="cart">
+            <div class="cart" onclick="renderCartModal()">
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span id="cart-count">0</span>
             </div>
@@ -159,11 +159,11 @@
                 <input type="email" id="sellerEmail" placeholder="Email" required>
                 <input type="tel" id="sellerPhone" placeholder="Phone" required>
                 <input type="text" id="sellerBusiness" placeholder="Business Name" required>
-                <textarea id="sellerProducts" placeholder="Products" required></textarea>
+                <input type="password" id="sellerPassword" placeholder="Create Password" required>
                 
-                <button type="submit">Submit</button>
+                <button type="submit" id="sellerRegisterBtn">Register</button>
                 
-                <button type="button" class="btn-seller-shortcut" onclick="closeSeller(); openLogin();">
+                <button type="button" class="btn-seller-shortcut" onclick="openSellerLogin()">
                     Already a Seller? Log In
                 </button>
 
@@ -171,6 +171,11 @@
             </form>
             <div id="sellerMsg"></div>
         </div>
+    </div>
+
+    <div id="cartModal" class="login-modal">
+        <div class="modal-card">
+            </div>
     </div>
 
     <footer class="site-footer">

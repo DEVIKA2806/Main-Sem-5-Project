@@ -21,8 +21,13 @@
             <label for="productDesc">Description</label>
             <textarea id="productDesc" placeholder="Describe materials, dimensions, and origin." rows="5" required></textarea>
 
-            <label for="productPrice">Price ($)</label>
-            <input type="number" id="productPrice" placeholder="0.00" step="0.01" min="0" required>
+            <label for="productPrice">Price (₹)</label>
+            <p style="font-size: 0.8em; color: #6C757D; margin-top: 5px; margin-bottom: 5px;">
+                Expected Price Range: Saree: ₹1000-8000, Artifacts: ₹200-5000, Lifestyle: ₹10-1000.
+            </p>
+            <input type="number" id="productPrice" placeholder="0" step="1" min="1" required>
+            
+            <label for="productCategory">Category (Page to Display Item)</label>
             
             <label for="productCategory">Category (Page to Display Item)</label>
             <select id="productCategory" required>

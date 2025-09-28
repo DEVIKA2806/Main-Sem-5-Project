@@ -1,24 +1,38 @@
 const express = require('express');
 const router = express.Router();
 const Seller = require('../models/Seller'); // Import the new Seller Model
+const User = require('../models/User'); // Import the User Model
+const bcrypt = require('bcryptjs'); // For hashing the password
 
 // POST /api/seller/register
 router.post('/register', async (req, res) => {
-    const { name, email, phone, business, products } = req.body;
+    // Added 'password'
+    const { name, email, phone, business, products, password } = req.body; 
 
     // 1. Basic validation
-    if (!name || !email || !business) {
-        return res.status(400).json({ message: 'Missing required fields.' });
+    if (!name || !email || !business || !password) {
+        return res.status(400).json({ message: 'Missing required fields: Name, Email, Business Name, or Password.' });
     }
 
     try {
-        // 2. Check for existing seller email
-        const existingSeller = await Seller.findOne({ email });
-        if (existingSeller) {
-            return res.status(409).json({ message: 'This email is already registered as a seller.' });
+        // 2. Check for existing entries (User account first)
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            // This is crucial for the frontend logic to distinguish.
+            const message = existingUser.role === 'seller' 
+                ? 'This email is already registered as a seller. Please login.'
+                : 'This email is already registered as a standard user. Please login to your standard account first.' 
+            return res.status(409).json({ message });
         }
+        
+        // 3. Create NEW User Account with 'seller' role
+        const salt = await bcrypt.genSalt(10);
+        const passwordHash = await bcrypt.hash(password, salt);
 
-        // 3. Create new seller (status defaults to 'pending')
+        const newUser = new User({ name, email, passwordHash, role: 'seller' });
+        await newUser.save();
+
+        // 4. Create new Seller application (status defaults to 'pending')
         const newSeller = new Seller({
             name, 
             email, 
@@ -29,10 +43,11 @@ router.post('/register', async (req, res) => {
 
         const savedSeller = await newSeller.save();
         
-        // 4. Return success and the seller's new MongoDB ID
+        // 5. Return success and the user/seller IDs
         res.status(201).json({ 
-            message: 'Registration successful!', 
-            seller: savedSeller // This object contains the crucial _id used by the frontend
+            message: 'Seller application submitted successfully! Redirecting to dashboard.', 
+            seller: savedSeller,
+            userId: newUser._id
         });
 
     } catch (error) {
