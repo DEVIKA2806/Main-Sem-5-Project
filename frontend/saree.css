@@ -270,7 +270,7 @@ main .card:hover {
 }
 
 #cart-count {
-  position: absolute;
+  position: relative;
   top: -8px;
   right: -10px;
   background: #739072;

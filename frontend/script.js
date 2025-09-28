@@ -2,10 +2,10 @@
 const safeGetElement = (id) => document.getElementById(id);
 
 // *****************************************************************
-// 1. GLOBAL FUNCTIONS (MUST BE AT THE VERY TOP)
+// 1. GLOBAL FUNCTIONS
 // *****************************************************************
 
-// --- LOGIN/LOGOUT/MODAL FUNCTIONS ---
+// --- LOGIN/LOGOUT/MODAL FUNCTIONS (Existing Logic) ---
 
 function openLogin() {
     const loginModal = safeGetElement('loginModal');
@@ -16,14 +16,12 @@ function openLogin() {
     const loginCard = loginModal.querySelector('.login-card');
 
     if (token && user) {
-        // User is logged in: Show Log Out option
         loginCard.innerHTML = `
             <h3>Welcome Back, ${user.name}!</h3>
             <button onclick="logout()">Log Out</button>
             <button class="close-btn" onclick="closeLogin()">Close</button>
         `;
     } else {
-        // User is logged out: Restore LOGIN and SIGN IN form
         loginCard.innerHTML = `
             <h3>Login</h3>
             <input type="email" id="modalUsername" placeholder="Email" />
@@ -42,7 +40,6 @@ function closeLogin() {
     const loginModal = safeGetElement('loginModal');
     if (loginModal) loginModal.style.display = 'none';
 
-    // Clear fields only if they exist on the page
     const errorMsg = safeGetElement('modalError');
     const username = safeGetElement('modalUsername');
     const password = safeGetElement('modalPassword');
@@ -55,6 +52,7 @@ function closeLogin() {
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('currentSellerId'); // Clear seller ID on logout
     window.location.reload(); 
 }
 
@@ -102,7 +100,73 @@ function validateModalLogin() {
     });
 }
 
-// --- RESELL/SELLER FUNCTIONS ---
+// --- SELLER FUNCTIONS (Updated for Policy Enforcement) ---
+
+function redirectToSellerDashboard() {
+    closeSeller();
+    window.location.href = 'seller-dashboard.html';
+}
+
+function openSeller() {
+    const sellerModal = safeGetElement('sellerModal');
+    if (!sellerModal) return;
+
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+    const modalCard = sellerModal.querySelector('.modal-card');
+    
+    // Static HTML for the registration form (needed for rendering when logged out)
+    const originalFormContent = `
+        <h2>Join as Seller</h2>
+        <form id="sellerForm">
+            <input type="text" id="sellerName" placeholder="Name" required>
+            <input type="email" id="sellerEmail" placeholder="Email" required>
+            <input type="tel" id="sellerPhone" placeholder="Phone" required>
+            <input type="text" id="sellerBusiness" placeholder="Business Name" required>
+            <textarea id="sellerProducts" placeholder="Products" required></textarea>
+            
+            <button type="submit">Submit</button>
+            
+            <button type="button" class="btn-seller-shortcut" onclick="closeSeller(); openLogin();">
+                Already a Seller? Log In
+            </button>
+            
+            <button type="button" class="close-btn" onclick="closeSeller()">Close</button>
+        </form>
+        <div id="sellerMsg"></div>
+    `;
+
+
+    if (token && user) {
+        // STATE 1: User is LOGGED IN. Enforce logout policy before seller actions.
+        modalCard.innerHTML = `
+            <h2>Seller Access Policy</h2>
+            <h3>Hello, ${user.name}!</h3>
+            <p style="margin: 15px 0; color: #3A4D39; font-weight: 500;">
+                You must log out of your current session to proceed with Seller actions.
+            </p>
+            
+            <button type="button" class="btn-green" onclick="logout()">
+                Log Out First
+            </button>
+            
+            <button type="button" class="close-btn" onclick="closeSeller()">Close</button>
+        `;
+    } else {
+        // STATE 2: User is LOGGED OUT. Show the original registration form.
+        modalCard.innerHTML = originalFormContent;
+    }
+    
+    sellerModal.style.display = 'flex';
+}
+
+function closeSeller() {
+    const sellerModal = safeGetElement('sellerModal');
+    const sellerMsg = safeGetElement('sellerMsg');
+    
+    if (sellerModal) sellerModal.style.display = 'none';
+    if (sellerMsg) sellerMsg.textContent = '';
+}
 
 function openResell() {
     const resellModal = safeGetElement('resellModal');
@@ -119,21 +183,6 @@ function closeResell() {
     if (resellForm) resellForm.reset();
 }
 
-function openSeller() {
-    const sellerModal = safeGetElement('sellerModal');
-    if (sellerModal) sellerModal.style.display = 'flex';
-}
-
-function closeSeller() {
-    const sellerModal = safeGetElement('sellerModal');
-    const sellerMsg = safeGetElement('sellerMsg');
-    const sellerForm = safeGetElement('sellerForm');
-    
-    if (sellerModal) sellerModal.style.display = 'none';
-    if (sellerMsg) sellerMsg.textContent = '';
-    if (sellerForm) sellerForm.reset();
-}
-
 // --- CONTACT FUNCTION ---
 
 function closeContact() {
@@ -143,8 +192,18 @@ function closeContact() {
     if (contactMsg) contactMsg.textContent = '';
     if (contactForm) contactForm.reset();
     
-    window.location.href = "/index.html"; 
+    // Only close the modal, do not redirect
+    const contactModal = safeGetElement('contactModal');
+    if (contactModal) contactModal.style.display = 'none';
 }
+
+function openContact() {
+    const contactModal = document.getElementById('contactModal');
+    if (contactModal) {
+        contactModal.style.display = 'flex';
+    }
+}
+
 
 // --- DYNAMIC NAV BUTTON RENDERING ---
 function renderNavButton() {
@@ -155,7 +214,7 @@ function renderNavButton() {
     const user = JSON.parse(localStorage.getItem('user'));
 
     if (token && user) {
-        // Logged In: Show user icon (if you want text, you need to adjust CSS)
+        // Logged In: Show user icon
         container.innerHTML = `
             <button class="login logged-in" onclick="openLogin()">
                 <i class="fa-solid fa-user"></i>
@@ -239,7 +298,6 @@ if (registerForm) {
     registerForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // Get and compare passwords (from regPassword1 and regPassword2 in register.html)
         const name = safeGetElement('regName')?.value.trim();
         const email = safeGetElement('regEmail')?.value.trim();
         const password = safeGetElement('regPassword1')?.value.trim();
@@ -295,11 +353,12 @@ if (registerForm) {
 }
 
 
-// -------------------- SELLER MODAL SUBMISSION --------------------
+// -------------------- SELLER MODAL SUBMISSION (MERN INTEGRATED) --------------------
 const sellerForm = safeGetElement('sellerForm');
 if (sellerForm) { 
     sellerForm.addEventListener('submit', function(e) {
         e.preventDefault();
+        
         const name = safeGetElement('sellerName')?.value.trim();
         const email = safeGetElement('sellerEmail')?.value.trim();
         const phone = safeGetElement('sellerPhone')?.value.trim();
@@ -307,14 +366,63 @@ if (sellerForm) {
         const products = safeGetElement('sellerProducts')?.value.trim();
         const sellerMsg = safeGetElement('sellerMsg');
 
+        // 1. Client-Side Validation
         if (!name || !email || !phone || !business || !products) {
             if (sellerMsg) { sellerMsg.style.color = "red"; sellerMsg.textContent = "Please fill in all fields."; }
             return;
         }
 
-        if (sellerMsg) { sellerMsg.style.color = "green"; sellerMsg.textContent = "Thank you for registering as a seller!"; }
+        if (sellerMsg) { 
+            sellerMsg.style.color = "orange"; 
+            sellerMsg.textContent = "Submitting application to server..."; 
+        }
+
+        // --- MERN Backend Fetch Call: /api/seller/register ---
+        fetch('/api/seller/register', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, phone, business, products })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.seller && data.seller._id) {
+                // SUCCESS: Registration saved to MongoDB
+                if (sellerMsg) { 
+                    sellerMsg.style.color = "green"; 
+                    sellerMsg.textContent = "Success! Redirecting to your dashboard..."; 
+                }
+                
+                // CRUCIAL STEP 1: Save the Seller ID returned by the backend
+                localStorage.setItem('currentSellerId', data.seller._id); 
+
+                setTimeout(() => { 
+                    closeSeller();
+                    // CRUCIAL STEP 2: Redirect to the product creation page
+                    window.location.href = 'seller-dashboard.html'; 
+                }, 1500);
+            } else {
+                if (sellerMsg) {
+                    sellerMsg.style.color = "red";
+                    // Check for the specific email conflict error from the backend
+                    if (data.message && data.message.includes('already registered')) {
+                        sellerMsg.innerHTML = `
+                            ${data.message}<br><br>
+                            <button class="btn-seller-login" onclick="closeSeller(); openLogin();">
+                                Click here to Login
+                            </button>`;
+                    } else {
+                        // Generic failure message
+                        sellerMsg.textContent = data.message || "Registration failed. Please try again.";
+                    }
+                }
+            }
+        })
+        .catch(err => {
+            console.error('Seller registration fetch error:', err);
+            if (sellerMsg) { sellerMsg.style.color = "red"; sellerMsg.textContent = "Network error. Server unreachable."; }
+        });
+        
         this.reset();
-        setTimeout(() => { closeSeller(); }, 2000);
     });
 }
 
@@ -385,8 +493,6 @@ document.querySelectorAll('a[href^="#about-section"]').forEach(anchor => {
 });
 
 
-// --- In your main script.js file (at the bottom) ---
-
 // -------------------- SAREE PAGE LOGIC (Moved from saree.js) --------------------
 
 // Toggle sidebar filters (for mobile)
@@ -433,4 +539,3 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
-// -----------------------------------------------------------------
