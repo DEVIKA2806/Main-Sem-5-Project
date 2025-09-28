@@ -179,7 +179,7 @@ main .card:hover {
 }
 
 .card-img-top {
-  height: 600px;
+  height: 350px;
   object-fit: cover;
 }
 

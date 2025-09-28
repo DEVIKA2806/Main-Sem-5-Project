@@ -1152,3 +1152,15 @@ body {
 .btn-seller-shortcut:hover {
     background-color: #888888 !important;
 }
+
+.shop-item a {
+    text-decoration: none;
+    color: #3A4D39;
+    font-weight: 600;
+    text-align: center;
+}
+
+.shop-item a:hover {
+    text-decoration: underline;
+    font-weight: 500;
+}
