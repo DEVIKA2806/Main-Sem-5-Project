@@ -143,6 +143,29 @@ function removeItem(productId) {
 // 2. AUTH & MODAL FUNCTIONS
 // *****************************************************************
 
+function closeLogin() {
+    const loginModal = safeGetElement('loginModal');
+    if (loginModal) loginModal.style.display = 'none';
+    const modalError = safeGetElement('modalError');
+    if (modalError) modalError.textContent = '';
+}
+
+// FIX: Added dedicated global logout function
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('currentSellerId'); // Clear seller ID too
+    cart = []; // Empty cart on logout
+    localStorage.removeItem('cart');
+    updateCartCount();
+    closeLogin();
+    // Use setTimeout to ensure closing modal finishes before reload in some cases
+    setTimeout(() => {
+        window.location.reload(); 
+    }, 100);
+}
+
+
 // --- USER LOGIN (Modified for dynamic content & robust role check) ---
 function openLogin() {
     const loginModal = safeGetElement('loginModal');
@@ -161,6 +184,7 @@ function openLogin() {
             <button class="close-btn" onclick="closeLogin()">Close</button>
         `;
     } else {
+        // Re-render the original login form content dynamically
         loginCard.innerHTML = `
             <h3>User Login</h3>
             <input type="email" id="modalUsername" placeholder="Email" />
@@ -234,6 +258,8 @@ function validateModalLogin() {
 function openSellerLogin() {
     // Renders the dedicated Seller Login form inside the sellerModal
     const sellerModal = safeGetElement('sellerModal');
+    if (!sellerModal) { console.error('Seller modal not found'); return; }
+
     const modalCard = sellerModal.querySelector('.modal-card');
     
     modalCard.innerHTML = `
@@ -392,6 +418,14 @@ function handleSellerRegistration(e) {
                 sellerMsg.textContent = data.message; 
             }
             
+            // CRITICAL FIX: Ensure currentSellerId is set upon successful registration and token/user is updated
+            localStorage.setItem('token', data.token || 'temp_token'); 
+            localStorage.setItem('user', JSON.stringify({ 
+                id: data.userId, 
+                name: name, 
+                email: email, 
+                role: 'seller' 
+            }));
             localStorage.setItem('currentSellerId', data.seller._id); 
             
             setTimeout(() => { 
@@ -424,6 +458,8 @@ function closeSeller() {
     if (sellerModal) sellerModal.style.display = 'none';
     const sellerMsg = safeGetElement('sellerMsg');
     if (sellerMsg) sellerMsg.textContent = '';
+    // Re-render nav button in case a user was prompted to logout
+    renderNavButton();
 }
 
 
@@ -535,7 +571,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const price = priceText ? parseFloat(priceText) : NaN;
                 
                 const imageUrl = imageElement?.src || '';
-                const productId = title.replace(/\s/g, '_').toLowerCase(); 
+                // Added a unique id part to ensure dynamically added items are unique
+                const baseProductId = title.replace(/\s/g, '_').toLowerCase(); 
+                const productId = baseProductId + '-' + Math.random().toString(36).substr(2, 5); 
 
                 if (isNaN(price)) {
                      console.error('Invalid price for item:', title);
@@ -553,8 +591,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // -------------------- INITIAL ATTACHMENTS --------------------
 const shopNowBtn = safeGetElement("shop-now");
 if (shopNowBtn) {
+    // FIX: Changed absolute path to relative path
     shopNowBtn.addEventListener("click", function() {
-        window.location.href = "/shop-now.html";
+        window.location.href = "shop-now.html";
     });
 }
 
