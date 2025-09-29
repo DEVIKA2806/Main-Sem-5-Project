@@ -45,6 +45,9 @@ app.use('/api/products', productRoutes);
 app.use('/api/seller', sellerRoutes); // Handles POST /api/seller/register
 // app.use('/api/product', productAddRoutes); // <-- CORRECTED: Corresponding app.use is commented out.
 
+// NEW PRODUCT ADDITION ROUTE for seller dashboard
+app.use('/api/product', productAddRoutes); // <-- CORRECTED: Added the new route
+
 // Serve static frontend files
 const FRONTEND_DIR = path.join(__dirname, '../frontend');
 app.use(express.static(FRONTEND_DIR));
