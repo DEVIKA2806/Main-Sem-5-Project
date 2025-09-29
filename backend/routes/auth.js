@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const Seller = require('../models/Seller'); // Added Seller model import
+const Seller = require('../models/Seller');
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
@@ -74,20 +74,29 @@ router.post('/seller-login', async (req, res) => {
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return res.status(401).json({ message: 'Invalid credentials. Please check your email and password.' });
         
-        // After user authentication, check seller application status
+        // After user authentication, fetch seller application status
         const sellerInfo = await Seller.findOne({ email });
         
-        // Deny login if the application isn't 'active'
-        if (!sellerInfo || sellerInfo.status !== 'active') {
-            return res.status(403).json({ 
-                message: `Seller access pending review. Current status: ${sellerInfo ? sellerInfo.status : 'Pending Registration Completion.'}`,
-                sellerInfo: sellerInfo || { _id: user._id }
-            });
-        }
+        // **FIX**: The status check that blocked access is commented out below.
+        // All sellers (pending or active) are now granted access to the dashboard.
         
         // All good: generate token and return user/seller data including sellerId
         const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
-        res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role, sellerId: sellerInfo._id } });
+        
+        // Send the current status so the dashboard can display the message
+        const currentStatus = sellerInfo ? sellerInfo.status : 'pending'; 
+
+        res.json({ 
+            token, 
+            user: { 
+                id: user._id, 
+                name: user.name, 
+                email: user.email, 
+                role: user.role, 
+                sellerId: sellerInfo ? sellerInfo._id : null,
+                status: currentStatus // Include the current status
+            } 
+        });
 
     } catch (err) {
         console.error(err);

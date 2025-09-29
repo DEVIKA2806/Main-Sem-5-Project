@@ -3,25 +3,22 @@ const safeGetElement = (id) => document.getElementById(id);
 const BACKEND_URL = ''; 
 
 // *****************************************************************
-// 1. GLOBAL STATE AND CART FUNCTIONS (UPDATED FOR DEDICATED PAGE)
+// 1. GLOBAL STATE AND CART FUNCTIONS
 // *****************************************************************
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
 function updateCartCount() {
     const countElement = safeGetElement('cart-count');
     if (countElement) {
-        // Count total unique items
         countElement.textContent = cart.length; 
     }
 }
 
-// Helper to retrieve user data safely and set default role for legacy accounts
 function getLoggedInUser() {
     const user = JSON.parse(localStorage.getItem('user'));
     const token = localStorage.getItem('token');
     
     if (token && user && !user.role) {
-        // CRITICAL FIX: Assume 'user' role if logged in but role is missing
         user.role = 'user';
     }
     
@@ -32,7 +29,7 @@ function getLoggedInUser() {
 function addToCart(productId, title, price, imageUrl) {
     const user = getLoggedInUser(); 
     
-    if (!user || user.role !== 'user') { // Check if logged in as a standard user
+    if (!user || user.role !== 'user') { 
         alert('You must be logged in as a standard customer to add items to the cart.');
         openLogin();
         return;
@@ -59,14 +56,12 @@ function addToCart(productId, title, price, imageUrl) {
 }
 
 
-// NEW FUNCTION: Renders the content of cart.html
 function renderCartPage() {
     const cartItemsList = safeGetElement('cartItemsList');
     const cartSummary = safeGetElement('cartSummary');
     const cartEmptyMessage = safeGetElement('cartEmptyMessage');
     const cartSubtotal = safeGetElement('cartSubtotal');
     
-    // Safety check to ensure we are on the cart.html page
     if (!cartItemsList || !cartSummary) return;
 
     if (cart.length === 0) {
@@ -118,23 +113,21 @@ function changeQuantity(productId, delta) {
         cart[itemIndex].qty += delta;
         
         if (cart[itemIndex].qty <= 0) {
-            // Remove the item if quantity drops to 0 or less
             removeItem(productId);
         } else {
             localStorage.setItem('cart', JSON.stringify(cart));
-            renderCartPage(); // Re-render the page
+            renderCartPage(); 
         }
     }
 }
 
 function removeItem(productId) {
-    // Finds item index, removes exactly one item at that index
     const itemIndex = cart.findIndex(item => item.productId === productId);
     
     if (itemIndex > -1) {
         cart.splice(itemIndex, 1); 
         localStorage.setItem('cart', JSON.stringify(cart));
-        renderCartPage(); // Re-render the page
+        renderCartPage(); 
     }
 }
 
@@ -148,18 +141,17 @@ function closeLogin() {
     if (loginModal) loginModal.style.display = 'none';
     const modalError = safeGetElement('modalError');
     if (modalError) modalError.textContent = '';
+    renderNavButton();
 }
 
-// FIX: Added dedicated global logout function
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    localStorage.removeItem('currentSellerId'); // Clear seller ID too
-    cart = []; // Empty cart on logout
+    localStorage.removeItem('currentSellerId'); 
+    cart = []; 
     localStorage.removeItem('cart');
     updateCartCount();
     closeLogin();
-    // Use setTimeout to ensure closing modal finishes before reload in some cases
     setTimeout(() => {
         window.location.reload(); 
     }, 100);
@@ -184,7 +176,6 @@ function openLogin() {
             <button class="close-btn" onclick="closeLogin()">Close</button>
         `;
     } else {
-        // Re-render the original login form content dynamically
         loginCard.innerHTML = `
             <h3>User Login</h3>
             <input type="email" id="modalUsername" placeholder="Email" />
@@ -236,7 +227,6 @@ function validateModalLogin() {
             closeLogin();
             window.location.reload(); 
         } 
-        // FIX: Check for explicit seller portal error message
         else if (data.message && data.message.includes('incorrect login portal')) {
             errorMsg.style.color = "red";
             errorMsg.textContent = "This account is registered as a Seller/Admin. Please use the 'Join as Seller' link and choose 'Already a Seller? Log In'.";
@@ -256,7 +246,6 @@ function validateModalLogin() {
 // --- SELLER LOGIN/REGISTRATION (New Dedicated Flow) ---
 
 function openSellerLogin() {
-    // Renders the dedicated Seller Login form inside the sellerModal
     const sellerModal = safeGetElement('sellerModal');
     if (!sellerModal) { console.error('Seller modal not found'); return; }
 
@@ -300,23 +289,19 @@ function validateSellerLogin() {
     })
     .then(res => res.json())
     .then(data => {
-        if (data.token) {
+        // CRITICAL CHECK: Ensure token and sellerId are present for successful login and redirect
+        if (data.token && data.user && data.user.sellerId) { 
             errorMsg.style.color = "green";
-            errorMsg.textContent = "Login successful! Redirecting to dashboard...";
+            errorMsg.textContent = `Login successful! Status: ${data.user.status}. Redirecting to dashboard...`; 
 
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
-            if (data.user.sellerId) {
-                localStorage.setItem('currentSellerId', data.user.sellerId);
-            }
+            localStorage.setItem('currentSellerId', data.user.sellerId);
 
             setTimeout(() => {
                 window.location.href = 'seller-dashboard.html'; 
             }, 500);
 
-        } else if (data.message && data.message.includes('pending review')) {
-             errorMsg.style.color = 'red';
-             errorMsg.textContent = data.message;
         } else {
             errorMsg.style.color = "red";
             errorMsg.textContent = data.message || "Invalid credentials or login failed.";
@@ -336,14 +321,15 @@ function openSeller() {
     const user = getLoggedInUser(); 
     const modalCard = sellerModal.querySelector('.modal-card');
     
+    // Updated registration form HTML
     const registrationFormHtml = `
         <h2>Join as Seller</h2>
         <form id="sellerForm">
             <input type="text" id="sellerName" placeholder="Name" required>
             <input type="email" id="sellerEmail" placeholder="Email" required>
-            <input type="tel" id="sellerPhone" placeholder="Phone" required>
+            <input type="tel" id="sellerPhone" placeholder="Phone">
             <input type="text" id="sellerBusiness" placeholder="Business Name" required>
-            <textarea id="sellerProducts" placeholder="Products (e.g., Saree, Art, etc.)" required></textarea>
+            <textarea id="sellerProducts" placeholder="Products (e.g., Saree, Art, etc.)"></textarea>
             <input type="password" id="sellerPassword" placeholder="Create Password" required>
             
             <button type="submit" id="sellerRegisterBtn">Register</button>
@@ -358,7 +344,6 @@ function openSeller() {
     `;
 
     if (user && user.role === 'user') {
-        // Policy: Log out of regular user session first
         modalCard.innerHTML = `
             <h2>Seller Access Policy</h2>
             <h3>Hello, ${user.name}!</h3>
@@ -374,7 +359,6 @@ function openSeller() {
         `;
     } else {
         modalCard.innerHTML = registrationFormHtml;
-        // Re-attach event listener
         setTimeout(() => {
             const form = safeGetElement('sellerForm');
             if (form) form.addEventListener('submit', handleSellerRegistration);
@@ -389,14 +373,18 @@ function handleSellerRegistration(e) {
         
     const name = safeGetElement('sellerName')?.value.trim();
     const email = safeGetElement('sellerEmail')?.value.trim();
-    const phone = safeGetElement('sellerPhone')?.value.trim();
+    const phone = safeGetElement('sellerPhone')?.value.trim() || ''; 
     const business = safeGetElement('sellerBusiness')?.value.trim();
-    const products = safeGetElement('sellerProducts')?.value.trim();
+    const products = safeGetElement('sellerProducts')?.value.trim() || ''; 
     const password = safeGetElement('sellerPassword')?.value.trim();
     const sellerMsg = safeGetElement('sellerMsg');
 
-    if (!name || !email || !phone || !business || !products || !password) {
-        if (sellerMsg) { sellerMsg.style.color = "red"; sellerMsg.textContent = "Please fill in all fields."; }
+    // Only requiring name, email, business, and password.
+    if (!name || !email || !business || !password) {
+        if (sellerMsg) { 
+             sellerMsg.style.color = "red"; 
+             sellerMsg.textContent = "Please fill in all required fields (Name, Email, Business Name, Password)."; 
+        }
         return;
     }
 
@@ -412,21 +400,16 @@ function handleSellerRegistration(e) {
     })
     .then(res => res.json())
     .then(data => {
-        if (data.seller && data.userId) {
+        // CRITICAL CHECK: Successful registration now returns token and user data with sellerId
+        if (data.token && data.user && data.user.sellerId) { 
             if (sellerMsg) { 
                 sellerMsg.style.color = "green"; 
-                sellerMsg.textContent = data.message; 
+                sellerMsg.textContent = `Registration successful! Status: ${data.user.status || 'pending'}. Redirecting to dashboard...`; 
             }
             
-            // CRITICAL FIX: Ensure currentSellerId is set upon successful registration and token/user is updated
-            localStorage.setItem('token', data.token || 'temp_token'); 
-            localStorage.setItem('user', JSON.stringify({ 
-                id: data.userId, 
-                name: name, 
-                email: email, 
-                role: 'seller' 
-            }));
-            localStorage.setItem('currentSellerId', data.seller._id); 
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user)); 
+            localStorage.setItem('currentSellerId', data.user.sellerId); 
             
             setTimeout(() => { 
                 closeSeller();
@@ -458,7 +441,6 @@ function closeSeller() {
     if (sellerModal) sellerModal.style.display = 'none';
     const sellerMsg = safeGetElement('sellerMsg');
     if (sellerMsg) sellerMsg.textContent = '';
-    // Re-render nav button in case a user was prompted to logout
     renderNavButton();
 }
 
@@ -540,7 +522,6 @@ function renderNavButton() {
 
 window.addEventListener('load', renderNavButton);
 
-// -------------------- ADD TO CART BUTTONS --------------------
 document.addEventListener('DOMContentLoaded', () => {
     // Only run renderCartPage logic on cart.html
     if (window.location.pathname.endsWith('cart.html')) {
@@ -561,17 +542,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!container) return;
 
                 const titleElement = container.querySelector('.card-title') || container.querySelector('p:not(.fw-bold)');
-                // Use a generic selector that finds the price text node
                 const priceElement = container.querySelector('.fw-bold') || container.querySelector('p:not(.card-text):not(:first-child)'); 
                 const imageElement = container.querySelector('img');
 
                 const title = titleElement?.textContent.trim() || 'Untitled Product';
-                // CRITICAL FIX: Strip non-numeric/non-dot/non-comma characters for robust price extraction
                 const priceText = priceElement?.textContent.replace(/[^0-9.]/g, '').trim(); 
                 const price = priceText ? parseFloat(priceText) : NaN;
                 
                 const imageUrl = imageElement?.src || '';
-                // Added a unique id part to ensure dynamically added items are unique
                 const baseProductId = title.replace(/\s/g, '_').toLowerCase(); 
                 const productId = baseProductId + '-' + Math.random().toString(36).substr(2, 5); 
 
@@ -591,13 +569,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // -------------------- INITIAL ATTACHMENTS --------------------
 const shopNowBtn = safeGetElement("shop-now");
 if (shopNowBtn) {
-    // FIX: Changed absolute path to relative path
     shopNowBtn.addEventListener("click", function() {
         window.location.href = "shop-now.html";
     });
 }
 
-// Attach listener to initial seller registration form on shop-now.html
 const initialSellerForm = safeGetElement('sellerForm');
 if (initialSellerForm) {
     initialSellerForm.addEventListener('submit', handleSellerRegistration);

@@ -1,15 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const Seller = require('../models/Seller');
-const User = require('../models/User'); // NEW
-const bcrypt = require('bcryptjs'); // NEW
+const User = require('../models/User'); 
+const bcrypt = require('bcryptjs'); 
+const jwt = require('jsonwebtoken'); // Added JWT import
 
 // POST /api/seller/register - Seller Registration (Creates User account + Seller application)
 router.post('/register', async (req, res) => {
-    // Added 'password' field from the frontend form
+    // Pass fields from the frontend form. Phone and Products are optional per schema.
     const { name, email, phone, business, products, password } = req.body; 
 
-    // 1. Basic validation
+    // 1. Basic validation - Checking essential fields
     if (!name || !email || !business || !password) {
         return res.status(400).json({ message: 'Missing required fields: Name, Email, Business Name, or Password.' });
     }
@@ -35,18 +36,29 @@ router.post('/register', async (req, res) => {
         const newSeller = new Seller({
             name, 
             email, 
-            phone, 
+            phone,
             businessName: business, 
             productsDesc: products 
         });
 
         const savedSeller = await newSeller.save();
         
-        // 5. Return success message and the crucial sellerId
+        // 5. CRITICAL FIX: Generate JWT token AFTER newUser is created
+        const token = jwt.sign({ id: newUser._id, email: newUser.email, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        
+        // 6. Return success message, user/seller data, and the JWT token
+        // This payload triggers instant login and redirection on the frontend.
         res.status(201).json({ 
-            message: 'Seller application submitted successfully! Your account will be reviewed.', 
-            seller: savedSeller,
-            userId: newUser._id // This is used to maintain local session state if necessary
+            message: 'Seller application submitted successfully! Redirecting to dashboard for review...', 
+            token: token,
+            user: { 
+                id: newUser._id, 
+                name: newUser.name, 
+                email: newUser.email, 
+                role: newUser.role,
+                sellerId: savedSeller._id, // Crucial for client-side storage
+                status: savedSeller.status // Return status (will be 'pending')
+            }
         });
 
     } catch (error) {

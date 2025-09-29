@@ -6,15 +6,55 @@
     <title>Hand2Heart - Seller Board</title>
     <link rel="stylesheet" href="style.css"> 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        .dashboard-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            margin-top: 100px; /* Push content down below navbar */
+        }
+        .product-form input, .product-form textarea, .product-form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .product-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .product-form button {
+            width: 100%;
+            padding: 10px;
+            background-color: #3A4D39;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1em;
+        }
+        .modal-message {
+            margin-top: 15px;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body class="shop-body">
 
     <div class="dashboard-container">
-        <h1>Add New Item for Sale</h1>
-        <p>Please enter the details for your product listing.</p>
+        <h1>Seller Dashboard</h1>
+        <p id="welcomeMessage">Loading...</p>
+        
+        <div id="sellerStatus" class="modal-message" style="color:red;"></div>
         
         <form id="productForm" class="product-form">
-            
+            <h2>Add New Item for Sale</h2>
             <label for="productName">Item Name</label>
             <input type="text" id="productName" placeholder="e.g., Hand-painted Ceramic Vase" required>
 
@@ -28,8 +68,6 @@
             <input type="number" id="productPrice" placeholder="0" step="1" min="1" required>
             
             <label for="productCategory">Category (Page to Display Item)</label>
-            
-            <label for="productCategory">Category (Page to Display Item)</label>
             <select id="productCategory" required>
                 <option value="">-- Select Product Type --</option>
                 <option value="saree">Saree Collection</option>
@@ -41,22 +79,44 @@
         </form>
 
         <p id="listingMsg" class="modal-message"></p>
+        <button onclick="logout()" style="background-color: #d9534f; margin-top: 20px;">Logout from Seller Account</button>
     </div>
 
     <script src="script.js"></script>
     <script>
-        // Separate script for the dashboard page logic, relying on script.js for fetch calls
-        const productForm = document.getElementById('productForm');
+        const safeGetElement = (id) => document.getElementById(id);
+        const productForm = safeGetElement('productForm');
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('token');
+        const sellerId = localStorage.getItem('currentSellerId'); 
+        const welcomeMessage = safeGetElement('welcomeMessage');
+        const sellerStatus = safeGetElement('sellerStatus');
+
+        // Initial check on page load to ensure seller is logged in
+        if (!token || !user || (user.role !== 'seller' && user.role !== 'admin')) {
+            alert('Access Denied. Please log in as a Seller.');
+            // Use window.location.replace to prevent back button issues
+            window.location.replace('shop-now.html'); 
+        } else {
+             welcomeMessage.textContent = `Welcome to your Seller Dashboard, ${user.name} (${user.email}).`;
+             // Check the status which is now included in the local storage user object
+             if (user.status && user.status === 'pending') {
+                 sellerStatus.textContent = "Your account status is currently 'pending review'. You can add products, but listings may not appear immediately.";
+             } else {
+                 sellerStatus.textContent = "Your account is active. Start listing your products!";
+                 sellerStatus.style.color = 'green';
+             }
+        }
+
 
         if (productForm) {
             productForm.addEventListener('submit', function(event) {
                 event.preventDefault();
                 
                 const listingMsg = document.getElementById('listingMsg');
-                const sellerId = localStorage.getItem('currentSellerId'); // Get the ID saved from registration
                 
                 if (!sellerId) {
-                    listingMsg.textContent = "Error: Seller ID not found. Please re-register or log in.";
+                    listingMsg.textContent = "Error: Seller ID not found. Please log in again.";
                     listingMsg.style.color = 'red';
                     return;
                 }
@@ -96,6 +156,9 @@
                 });
             });
         }
+        
+        // Expose the global logout function from script.js to the dashboard buttons
+        window.logout = window.logout || logout; 
     </script>
 </body>
 </html>
