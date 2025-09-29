@@ -46,7 +46,7 @@
             </ul>
         </div>
         <div class="nav-right">
-            <div class="cart">
+            <div class="cart" onclick="window.location.href='cart.html'">
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span id="cart-count">0</span>
             </div>
@@ -127,12 +127,36 @@
 
           <div class="col">
             <div class="card h-100">
+              <img src="../assets/wood1-img.jpg" class="card-img-top" alt="Handmade Wood Earrings">
+              <div class="card-body">
+                <h5 class="card-title">Wood Earrings</h5>
+                <p class="card-text">Charming wood earrings, handmade with love by differently-abled artisans.</p>
+                <p class="fw-bold">₹399</p>
+                <button class="btn-green" onclick="addToCart('woodearrings1','Handmade Wood Earrings', '399', '../assets/wood1-img.jpg')">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="card h-100">
+              <img src="../assets/seashell2-img.jpg" class="card-img-top" alt="Seashell Hanging">
+              <div class="card-body">
+                <h5 class="card-title">Seashell Hanging</h5>
+                <p class="card-text">A charming, handcrafted wall hanging made from natural seashells to bring a coastal vibe to your home.</p>
+                <p class="fw-bold">₹599</p>
+                <button class="btn-green" onclick="addToCart('seashell2','Seashell Hanging', '599', '../assets/seashell2-img.jpg')">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="card h-100">
               <img src="../assets/glass_diy1-img.jpg" class="card-img-top" alt="Mosaic Glass DIY Kit">
               <div class="card-body">
                 <h5 class="card-title">Mosiac Glass DIY</h5>
                 <p class="card-text">Unleash your creativity with this all-in-one mosaic glass craft.</p>
                 <p class="fw-bold">₹399</p>
-                <button class="btn-green">Add to Cart</button>
+                <button class="btn-green" onclick="addToCart('glass1','Mosiac Glass DIY', '399', '../assets/glass_diy1-img.jpg')">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -144,7 +168,43 @@
                 <h5 class="card-title">Shawl</h5>
                 <p class="card-text">An opulent Jamawar shawl, renowned for its intricate paisley motifs and rich texture.</p>
                 <p class="fw-bold">₹1,499</p>
-                <button class="btn-green">Add to Cart</button>
+                <button class="btn-green" onclick="addToCart('shawl1','Jamawar Shawl', '1499', '../assets/shawl1-img.jpg')">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="card h-100">
+              <img src="../assets/seashell3-img.jpg" class="card-img-top" alt="Resin Beach Art">
+              <div class="card-body">
+                <h5 class="card-title">Resin Beach Art</h5>
+                <p class="card-text">A stunning piece of art capturing a serene beach scene in glossy, durable resin.</p>
+                <p class="fw-bold">₹599</p>
+                <button class="btn-green" onclick="addToCart('resinart1','Resin Beach Art', '599', '../assets/seashell3-img.jpg')">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="card h-100">
+              <img src="../assets/wood3-img.jpg" class="card-img-top" alt="Wooden Neckset">
+              <div class="card-body">
+                <h5 class="card-title">Wooden Neckset</h5>
+                <p class="card-text">A stunning, hand-carved wooden neckset that adds a touch of natural elegance to any outfit.</p>
+                <p class="fw-bold">₹999</p>
+                <button class="btn-green" onclick="addToCart('woodneckset1','Wooden Neckset', '999', '../assets/wood3-img.jpg')">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="card h-100">
+              <img src="../assets/seashell1-img.jpg" class="card-img-top" alt="Seashell Earrings">
+              <div class="card-body">
+                <h5 class="card-title">Seashell Earrings</h5>
+                <p class="card-text">Elegant earrings handcrafted from natural seashells, perfect for a beach-inspired look.</p>
+                <p class="fw-bold">₹599</p>
+                <button class="btn-green" onclick="addToCart('seashell1','Seashell Earrings', '599', '../assets/seashell1-img.jpg')">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -156,10 +216,24 @@
                 <h5 class="card-title">Patchwork Bag</h5>
                 <p class="card-text">A unique and eco-friendly tote bag, crafted from vibrant patchwork textiles.</p>
                 <p class="fw-bold">₹1,599</p>
-                <button class="btn-green">Add to Cart</button>
+                <button class="btn-green" onclick="addToCart('bag1','Patchwork Bag', '1599', '../assets/patchwork_bag-img.jpg')">Add to Cart</button>
               </div>
             </div>
           </div>
+
+          <div class="col">
+            <div class="card h-100">
+              <img src="../assets/crocbag-img.jpg" class="card-img-top" alt="Folk art wood jewelry">
+              <div class="card-body">                               
+                <h5 class="card-title">Crochet Bag</h5>
+                <p class="card-text">A beautiful crochet bag, made with love by differently-abled artisans.</p>
+                <p class="fw-bold">₹399</p>
+                <button class="btn-green" onclick="addToCart('crochetbag1','Crochet Bag', '399', '../assets/crochet_bag-img.jpg')">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+
+          
 
           <div class="col">
             <div class="card h-100">
@@ -168,7 +242,7 @@
                 <h5 class="card-title">Shawl</h5>
                 <p class="card-text">An exquisite Phulkari shawl featuring vibrant, traditional Punjabi embroidery.</p>
                 <p class="fw-bold">₹1,999</p>
-                <button class="btn-green">Add to Cart</button>
+                <button class="btn-green" onclick="addToCart('shawl2','Shawl', '1999', '../assets/shawl2-img.jpg')">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -181,7 +255,19 @@
                 <h5 class="card-title">Wall hanging</h5>
                 <p class="card-text">A beautifully handcrafted piece to add an artistic touch to your walls.</p>
                 <p class="fw-bold">₹569</p>
-                <button class="btn-green">Add to Cart</button>
+                <button class="btn-green" onclick="addToCart('wall-hanging1','Wall Hanging', '569', '../assets/wallhanging-img.jpg')">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="card h-100">
+              <img src="../assets/wood2-img.jpg" class="card-img-top" alt="Wood Bead Purse">
+              <div class="card-body">
+                <h5 class="card-title">Wooden Bead Purse</h5>
+                <p class="card-text">A stylish and unique purse, beautifully crafted from smooth, polished wooden beads.</p>
+                <p class="fw-bold">₹1,299</p>
+                <button class="btn-green" onclick="addToCart('woodpurse1','Wood Bead Purse', '1299', '../assets/wood2-img.jpg')">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -193,7 +279,7 @@
                 <h5 class="card-title">Jar Lamp</h5>
                 <p class="card-text">Enchanting jar lamp.</p>
                 <p class="fw-bold">₹499</p>
-                <button class="btn-green">Add to Cart</button>
+                <button class="btn-green" onclick="addToCart('lamp1','Jar Lamp', '499', '../assets/glass_diy2-img.jpg')">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -205,7 +291,7 @@
                 <h5 class="card-title">Wall hanging</h5>
                 <p class="card-text">Intricately designed wall art to elevate your home decor.</p>
                 <p class="fw-bold">₹499</p>
-                <button class="btn-green">Add to Cart</button>
+                <button class="btn-green" onclick="addToCart('wallhanging2','Wall Hanging', '499', '../assets/wallhanging2-img.jpg')">Add to Cart</button>
               </div>
             </div>
           </div>
