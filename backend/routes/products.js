@@ -45,8 +45,6 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// ... existing imports ...
-const mongoose = require('mongoose'); 
 
 // ... existing routes (/ and /) ...
 
