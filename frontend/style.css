@@ -36,10 +36,15 @@ body {
 
 .green {
     color:#273826;
+    font-weight: 700;
 }
 
 .nav-items {
     align-self: flex-end;
+}
+
+.icon {
+    align-self: center;
 }
 
 .nav-items ul{
