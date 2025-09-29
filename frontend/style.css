@@ -42,6 +42,10 @@ body {
     align-self: flex-end;
 }
 
+.icon {
+    align-self: center;
+}
+
 .nav-items ul{
     display: flex;
     align-items: center;
