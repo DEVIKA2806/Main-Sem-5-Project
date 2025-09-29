@@ -141,6 +141,7 @@ aside {
   border: 1px solid #ddd;
   border-radius: 10px;
   height: fit-content;
+  
 }
 
 aside h5 {
@@ -161,7 +162,7 @@ aside h6 {
 aside ul li {
   font-size: 0.95rem;
   list-style: none;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }
 
 /* Product Cards */
