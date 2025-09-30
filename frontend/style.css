@@ -243,6 +243,13 @@ body {
     font-weight: 600;
 }
 
+.video-btn .user-type-btn:hover {
+    background-color: #ECE3CE; /* beige */
+    color: #3A4D39; /* dark green */
+    border: 1px solid #3A4D39; /* Add a border to define the button shape */
+    padding: 13px 27px; /* Adjust padding to account for the new border */
+}
+
 .about-section {
     text-align: center;
     margin-top: 2rem;
