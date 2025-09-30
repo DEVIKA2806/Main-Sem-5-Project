@@ -97,7 +97,6 @@
             const welcomeMessage = safeGetElement('welcomeMessage');
             const sellerStatus = safeGetElement('sellerStatus');
 
-            // Initial check on page load to ensure seller is logged in
             if (!token || !user || (user.role !== 'seller' && user.role !== 'admin')) {
                 alert('Access Denied. Please log in as a Seller.');
                 window.location.replace('shop-now.html'); 
@@ -116,6 +115,7 @@
                     event.preventDefault();
                     
                     const listingMsg = document.getElementById('listingMsg');
+                    const category = document.getElementById('productCategory').value;
                     
                     if (!sellerId) {
                         listingMsg.textContent = "Error: Seller ID not found. Please log in again.";
@@ -128,7 +128,7 @@
                     formData.append('productName', document.getElementById('productName').value);
                     formData.append('description', document.getElementById('productDesc').value);
                     formData.append('price', parseFloat(document.getElementById('productPrice').value).toFixed(2));
-                    formData.append('category', document.getElementById('productCategory').value);
+                    formData.append('category', category);
                     formData.append('productImage', document.getElementById('productImage').files[0]);
                     
                     listingMsg.textContent = `Adding product...`;
@@ -144,6 +144,11 @@
                             listingMsg.textContent = data.message;
                             listingMsg.style.color = '#3A4D39'; 
                             productForm.reset();
+                            
+                            setTimeout(() => {
+                                window.location.href = `${category}.html`;
+                            }, 1000);
+
                         } else {
                             listingMsg.textContent = data.message || "Failed to list product.";
                             listingMsg.style.color = 'red';
