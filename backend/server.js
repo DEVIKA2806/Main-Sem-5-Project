@@ -6,13 +6,12 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-// 1. IMPORT ALL ROUTES (Existing and New)
+// 1. IMPORT ALL ROUTES
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products'); // Existing Product CRUD
 const orderRoutes = require('./routes/orders');
 const contactRoutes = require('./routes/contact');
 const sellerRoutes = require('./routes/seller'); // <-- NEW: Seller Registration
-// const productAddRoutes = require('./routes/product'); // <-- CORRECTED: Module not found error. This line is temporarily commented out.
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -37,16 +36,11 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/contact', contactRoutes);
-
-// Existing Product CRUD route (e.g., /api/products)
-app.use('/api/products', productRoutes); 
-
-// NEW SELLER ROUTES
 app.use('/api/seller', sellerRoutes); // Handles POST /api/seller/register
-// app.use('/api/product', productAddRoutes); // <-- CORRECTED: Corresponding app.use is commented out.
 
-// NEW PRODUCT ADDITION ROUTE for seller dashboard
-app.use('/api/product', productAddRoutes); // <-- CORRECTED: Added the new route
+// Use a single base path for all product-related routes.
+// This will handle GET /api/products, POST /api/products/add, etc.
+app.use('/api/products', productRoutes);
 
 // Serve static frontend files
 const FRONTEND_DIR = path.join(__dirname, '../frontend');

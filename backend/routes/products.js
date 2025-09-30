@@ -133,41 +133,41 @@ router.delete('/:id', auth, async (req, res) => {
 });
 
 // POST /api/product/add - Handles new product listings from the seller dashboard
-router.post('/add', async (req, res) => {
-    // In a real application, you'd perform proper authentication (e.g., check JWT token)
-    // to verify the seller is logged in and their account is 'active'.
+// router.post('/add', async (req, res) => {
+//     // In a real application, you'd perform proper authentication (e.g., check JWT token)
+//     // to verify the seller is logged in and their account is 'active'.
     
-    const { sellerId, productName, description, price, category } = req.body;
+//     const { sellerId, productName, description, price, category } = req.body;
 
-    if (!sellerId || !productName || !description || !price || !category) {
-        return res.status(400).json({ message: 'Missing required product fields.' });
-    }
+//     if (!sellerId || !productName || !description || !price || !category) {
+//         return res.status(400).json({ message: 'Missing required product fields.' });
+//     }
 
-    try {
-        // Create the new product object
-        const newProduct = new Product({
-            sellerId: sellerId,
-            title: productName,
-            description: description,
-            price: parseFloat(price),
-            category: category.toLowerCase(), // Ensure lowercase for enum match
-            // NOTE: In a complete implementation, an image upload service would provide a real URL.
-            imageUrl: `/assets/${category}-default.jpg`, 
-            stock: 100 // Default stock
-        });
+//     try {
+//         // Create the new product object
+//         const newProduct = new Product({
+//             sellerId: sellerId,
+//             title: productName,
+//             description: description,
+//             price: parseFloat(price),
+//             category: category.toLowerCase(), // Ensure lowercase for enum match
+//             // NOTE: In a complete implementation, an image upload service would provide a real URL.
+//             imageUrl: `/assets/${category}-default.jpg`, 
+//             stock: 100 // Default stock
+//         });
 
-        // Simulating the database save operation and getting a MongoDB ID
-        const savedProduct = await newProduct.save();
+//         // Simulating the database save operation and getting a MongoDB ID
+//         const savedProduct = await newProduct.save();
 
-        res.status(201).json({ 
-            message: `Product "${productName}" added successfully to category "${category}".`,
-            product: savedProduct
-        });
+//         res.status(201).json({ 
+//             message: `Product "${productName}" added successfully to category "${category}".`,
+//             product: savedProduct
+//         });
 
-    } catch (error) {
-        console.error('Product Add Error:', error);
-        res.status(500).json({ message: 'Internal server error during product listing. Check your database connection and schema constraints.' });
-    }
-});
+//     } catch (error) {
+//         console.error('Product Add Error:', error);
+//         res.status(500).json({ message: 'Internal server error during product listing. Check your database connection and schema constraints.' });
+//     }
+// });
 
 module.exports = router;
