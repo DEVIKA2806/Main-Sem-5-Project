@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand2Heart - Video Chat</title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="saree.css">
+
+    <style>
+        .video-chat-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #ECE3CE;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        .video-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .video-player {
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        .video-player video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .video-player p {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 0;
+        }
+        .controls, .signaling {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .controls button {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        textarea {
+            min-height: 120px;
+        }
+    </style>
+</head>
+<body class="shop-body">
+
+    <div class="navbar">
+        <div class="logo">
+            <span class="white">HAND to</span><span class="green"> HEART <i class="fa-solid fa-hand-holding-heart icon"></i></span>
+        </div>
+        <div class="nav-items">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li>|</li>
+                <li><a href="shop-now.html">Items</a></li>
+                <li>|</li>
+                <li><a href="about.html">About Us</a></li>
+                <li>|</li>
+                <li><a href="contact.html">Contact Us</a></li>
+                <li>|</li>
+                <li><a href="#">Featured</a></li>
+            </ul>
+        </div>
+        <div class="nav-right">
+            <div class="cart" onclick="window.location.href='cart.html'">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cart-count">0</span>
+            </div>
+            <div class="login">
+                <button class="login" onclick="openLogin()"><i class="fa-solid fa-user"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container video-chat-container">
+        <h1 class="text-center mb-4" style="color: #3A4D39;">Video Chat with Seller</h1>
+
+        <div class="video-wrapper">
+            <div class="video-player">
+                <video id="localVideo" autoplay playsinline muted></video>
+                <p>Your Video</p>
+            </div>
+            <div class="video-player">
+                <video id="remoteVideo" autoplay playsinline></video>
+                <p>Seller's Video</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h5 style="color: #3A4D39;">Controls</h5>
+            <button id="startBtn" class="btn btn-success">Start Camera</button>
+            <button id="createBtn" class="btn btn-primary" disabled>Create Room</button>
+            <button id="joinBtn" class="btn btn-info" disabled>Join Room</button>
+            <button id="hangupBtn" class="btn btn-danger" disabled>Hang Up</button>
+        </div>
+
+        <div id="signaling-status" class="alert alert-info" role="alert">
+            <strong>Status:</strong> Waiting to start...
+            <p class="small mb-0">
+                To connect, start your camera. If you are starting the call, click "Create Room" and share the page link. 
+                If you received a link, click "Join Room".
+            </p>
+            <div id="room-link-container" class="mt-2" style="display: none;">
+                <strong>Share this Room Link with your customer:</strong>
+                <div class="input-group">
+                    <input type="text" id="roomLink" class="form-control" readonly>
+                    <button class="btn btn-secondary" onclick="copyRoomLink()">Copy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>About Us</h3>
+                <p>We aim to connect sellers and buyers through a simple and elegant platform. 
+                    <a href="about.html">Learn more →</a>
+                </p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="shop-now.html">Shop Now</a></li>
+                    <li><a href="#" onclick="openSeller()">Join as Seller</a></li>
+                    <li><a href="#" onclick="openContact()">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 Hand2Heart. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+    <!-- You will need to include a signaling server client, like socket.io -->
+    <!-- <script src="/socket.io/socket.io.js"></script> -->
+    <script>
+        // DOM Elements
+        const startBtn = document.getElementById('startBtn');
+        const createBtn = document.getElementById('createBtn');
+        const joinBtn = document.getElementById('joinBtn');
+        const hangupBtn = document.getElementById('hangupBtn');
+        const statusDiv = document.getElementById('signaling-status');
+
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+
+        // WebRTC State
+        let localStream;
+        let peerConnection;
+        let currentRoom;
+        let isCaller = false;
+        // This would connect to your backend signaling server.
+        // const socket = io(); 
+
+        // STUN servers configuration
+        const configuration = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+        };
+
+        // --- Utility Functions ---
+        function getLoggedInUser() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            // Simple check, assuming 'user' object in localStorage has a 'role' property
+            if (user && user.role) {
+                return user;
+            }
+            return null;
+        }
+
+        function updateStatus(message) {
+            console.log(message);
+            statusDiv.innerHTML = `<strong>Status:</strong> ${message}`;
+        }
+
+        // --- Page Load Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = getLoggedInUser();
+            const urlParams = new URLSearchParams(window.location.search);
+            const roomIdFromUrl = urlParams.get('room');
+
+            if (!user) {
+                updateStatus('You must be logged in to use video chat. Please <a href="register.html">register or log in</a> to continue.');
+                startBtn.disabled = true;
+                createBtn.style.display = 'none';
+                joinBtn.style.display = 'none';
+                return;
+            }
+
+            if (user.role === 'seller') {
+                // Sellers can create rooms, they don't join via link
+                joinBtn.style.display = 'none';
+                updateStatus(`Welcome, Seller! Start your camera to create a room.`);
+            } else if (user.role === 'user') {
+                // Customers can only join
+                createBtn.style.display = 'none';
+                if (roomIdFromUrl) {
+                    updateStatus(`Welcome, Customer! Start your camera to join the room.`);
+                } else {
+                    updateStatus(`Welcome, Customer! You can only join a room using a link provided by a seller.`);
+                    joinBtn.style.display = 'none';
+                }
+            } else {
+                updateStatus('Your account role does not permit video chat access.');
+                startBtn.disabled = true;
+            }
+        });
+
+        // --- 1. Start Camera ---
+        startBtn.onclick = async () => {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVideo.srcObject = localStream;
+
+                // Enable call buttons
+                startBtn.disabled = true;
+                hangupBtn.disabled = false;
+
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('room')) {
+                    joinBtn.disabled = false;
+                } else {
+                    createBtn.disabled = false;
+                }
+
+                updateStatus("Camera started. Enter a room name and join.");
+            } catch (error) {
+                console.error('Error accessing media devices.', error);
+                alert('Could not access your camera or microphone. Please check permissions.');
+            }
+        };
+
+        // --- 2a. Create a Room ---
+        createBtn.onclick = () => {
+            isCaller = true;
+            createBtn.disabled = true;
+
+            // Generate a random room ID
+            const newRoomId = 'room-' + Math.random().toString(36).substr(2, 9);
+            currentRoom = newRoomId;
+
+            // Update the URL without reloading the page
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?room=' + newRoomId;
+            window.history.pushState({path: newUrl}, '', newUrl);
+
+            // Display the link for the seller to copy
+            const roomLinkContainer = document.getElementById('room-link-container');
+            const roomLinkInput = document.getElementById('roomLink');
+            roomLinkInput.value = newUrl;
+            roomLinkContainer.style.display = 'block';
+
+            updateStatus(`Room created! Waiting for the customer to join...`);
+            
+            // In a real app, you'd join the room on the server
+            // socket.emit('join-room', currentRoom);
+        };
+
+        function copyRoomLink() {
+            const roomLinkInput = document.getElementById('roomLink');
+            roomLinkInput.select();
+            document.execCommand('copy');
+            alert('Room link copied to clipboard!');
+        }
+
+        // --- 2b. Join a Room ---
+        joinBtn.onclick = () => {
+            isCaller = false;
+            joinBtn.disabled = true;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            currentRoom = urlParams.get('room');
+
+            if (currentRoom) {
+                updateStatus(`Joining room '${currentRoom}'. Creating connection...`);
+                // In a real app, you'd join the room on the server
+                // socket.emit('join-room', currentRoom);
+                isCaller = false;
+                updateStatus(`Joined room '${currentRoom}'. Creating connection...`);
+                startCall(); // The second person to join starts the call process
+            }
+            // --- END MOCKUP ---
+        };
+
+        // --- 3. Start the WebRTC Call process ---
+        async function startCall() {
+            updateStatus("Initializing WebRTC connection...");
+            peerConnection = new RTCPeerConnection(configuration);
+
+            // Add local stream to the peer connection
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+
+            // Listen for remote stream and display it
+            peerConnection.ontrack = event => {
+                if (!remoteVideo.srcObject) {
+                    updateStatus("Remote stream received. Connecting...");
+                    remoteVideo.srcObject = event.streams[0];
+                }
+            };
+
+            // If this user is the one initiating the call (the 2nd to join)
+            if (!isCaller) {
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                updateStatus("Offer created. Sending to other user...");
+                // In a real app, you'd send this offer via the signaling server
+                // socket.emit('webrtc-offer', { offer, room: currentRoom });
+            }
+        }
+
+        // --- MOCKUP FUNCTIONS to replace signaling server ---
+        // In a real app, these would be socket.on() event handlers
+
+        // Mock: Caller receives an offer
+        async function handleOffer(offer) {
+            if (isCaller) {
+                await startCall(); // Initialize peerConnection for the caller
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                updateStatus("Received offer, created answer. Sending back...");
+                // socket.emit('webrtc-answer', { answer, room: currentRoom });
+            }
+        }
+
+        // Mock: Callee receives an answer
+        async function handleAnswer(answer) {
+            if (!isCaller) {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                updateStatus("Connection established!");
+            }
+        }
+        // --- END MOCKUP ---
+
+
+        // --- 4. Hang Up ---
+        hangupBtn.onclick = () => {
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            localVideo.srcObject = null;
+            remoteVideo.srcObject = null;
+
+            startBtn.disabled = false;
+            joinBtn.disabled = true;
+            createBtn.disabled = true;
+            hangupBtn.disabled = true;
+            // Clear the room from URL
+            window.history.pushState({}, document.title, window.location.pathname);
+            document.getElementById('room-link-container').style.display = 'none';
+            updateStatus("Call ended. Ready to start a new one.");
+            window.isRoomTaken = false; // Reset mock state
+        };
+    </script>
+</body>
+</html>
