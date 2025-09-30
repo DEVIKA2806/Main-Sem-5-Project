@@ -232,6 +232,17 @@ body {
     margin-bottom: 30px;
 }
 
+.video-btn {
+    text-align: center;
+    margin-top: 3rem; /* Added some space above the button */
+}
+
+.video-btn .user-type-btn {
+    padding: 14px 28px; /* Increased padding for a larger button */
+    font-size: 1.1rem;  /* Slightly larger font */
+    font-weight: 600;
+}
+
 .about-section {
     text-align: center;
     margin-top: 2rem;
