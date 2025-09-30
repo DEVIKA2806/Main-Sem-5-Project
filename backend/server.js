@@ -6,24 +6,26 @@ const http = require('http');
 const { Server } = require("socket.io");
 const mongoose = require('mongoose');
 const cors = require('cors');
-const bodyParser = require('body-parser');
+// const bodyParser is removed. Using Express built-in middleware for consistency.
 
 // 1. IMPORT ALL ROUTES
 const authRoutes = require('./routes/auth');
-const productRoutes = require('./routes/products'); // Existing Product CRUD
+const customerProductRoutes = require('./routes/products'); // Original, for basic read endpoints
+const productCreationRoutes = require('./routes/products_new'); // <-- NEW: For seller actions
 const orderRoutes = require('./routes/orders');
 const contactRoutes = require('./routes/contact');
-const sellerRoutes = require('./routes/seller'); // <-- NEW: Seller Registration
+const sellerRoutes = require('./routes/seller'); 
+const deliveryRoutes = require('./routes/delivery'); // <-- NEW: Delivery Routes Routes
 
 const app = express();
-const server = http.createServer(app); // Wrap app in an HTTP server
+const server = http.createServer(app); 
 const PORT = process.env.PORT || 5000;
-const io = new Server(server); // Attach Socket.IO to the server
+const io = new Server(server); 
 
 // --- MIDDLEWARE ---
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
@@ -40,17 +42,20 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/contact', contactRoutes);
-app.use('/api/seller', sellerRoutes); // Handles POST /api/seller/register
+app.use('/api/seller', sellerRoutes);
 
-// Use a single base path for all product-related routes.
-// This will handle GET /api/products, POST /api/products/add, etc.
-app.use('/api/products', productRoutes);
+// Existing product retrieval endpoint remains
+app.use('/api/products', customerProductRoutes); 
+// New, dedicated endpoint for seller/product logic
+app.use('/api/product', productCreationRoutes); 
+
+app.use('/api/delivery', deliveryRoutes); 
 
 // Serve static frontend files
 const FRONTEND_DIR = path.join(__dirname, '../frontend');
 app.use(express.static(FRONTEND_DIR));
 
-// Serve assets (images, etc.)
+// Serve assets (images, etc.) - IMPORTANT for uploaded images
 const ASSETS_DIR = path.join(__dirname, '../assets');
 app.use('/assets', express.static(ASSETS_DIR));
 

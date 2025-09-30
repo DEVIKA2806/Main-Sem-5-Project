@@ -1,5 +1,3 @@
-// backend/routes/products_new.js (New File)
-
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
@@ -12,13 +10,14 @@ const fs = require('fs');
 const PRICE_RANGES = {
     saree: { min: 1000, max: 8000 },
     artifacts: { min: 200, max: 5000 },
-    lifestyle: { min: 10, max: 1000 }
+    lifestyle: { min: 10, max: 1000 },
+    other: { min: 1, max: 100000 } // Default fallback range
 };
 
-// Define disk storage for multer
+// --- MULTER CONFIGURATION (Issue #7) ---
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        // Destination directory: Assumes 'backend' is next to 'assets'
+        // Creates 'assets/products' directory if it doesn't exist (relative to project root)
         const dir = path.join(__dirname, '../../assets/products');
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
@@ -32,7 +31,6 @@ const storage = multer.diskStorage({
     }
 });
 
-// Configure multer to handle single image file upload (Issue #7)
 const upload = multer({ 
     storage: storage,
     limits: { fileSize: 1024 * 1024 * 5 }, // 5MB limit
@@ -45,9 +43,14 @@ const upload = multer({
     }
 });
 
-// POST /api/product/add - Add New Product (Protected)
+// POST /api/product/add - Add New Product (Protected by auth)
 router.post('/add', auth, (req, res, next) => {
-    // Use multer middleware for image upload
+    // Check if the user is a seller or admin
+    if (req.user.role !== 'seller' && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Forbidden. Only sellers can add products.' });
+    }
+
+    // Use multer middleware for image upload (Issue #7)
     upload.single('productImage')(req, res, async (err) => {
         const { sellerId, productName, description, price, category } = req.body;
         
@@ -58,29 +61,26 @@ router.post('/add', auth, (req, res, next) => {
             return res.status(500).json({ message: err.message });
         }
 
-        // Check if image file exists
         if (!req.file) {
             return res.status(400).json({ message: 'Product image is required.' });
         }
-        
-        // 1. Validate required fields
         if (!sellerId || !productName || !description || !price || !category) {
-            if (req.file) fs.unlinkSync(req.file.path); // Delete file on validation failure
+            if (req.file) fs.unlinkSync(req.file.path); 
             return res.status(400).json({ message: 'Missing required product fields.' });
         }
         
-        // 2. Validate Price Range (Issue #6)
+        // --- Price Range Validation (Issue #6) ---
         const numericPrice = parseFloat(price);
-        const range = PRICE_RANGES[category];
+        const range = PRICE_RANGES[category] || PRICE_RANGES.other;
         
-        if (!range || numericPrice < range.min || numericPrice > range.max) {
-            if (req.file) fs.unlinkSync(req.file.path); // Delete file on price validation failure
+        if (numericPrice < range.min || numericPrice > range.max) {
+            if (req.file) fs.unlinkSync(req.file.path);
             return res.status(400).json({ 
                 message: `Price (₹${numericPrice}) is outside the acceptable range for ${category}: ₹${range.min}-₹${range.max}.` 
             });
         }
         
-        // 3. Create new Product
+        // --- Create new Product ---
         try {
             const newProduct = new Product({
                 sellerId: sellerId,
@@ -88,7 +88,7 @@ router.post('/add', auth, (req, res, next) => {
                 description: description,
                 price: numericPrice,
                 category: category,
-                // Store the relative URL for frontend use
+                // Store the relative URL for frontend use (Issue #7)
                 imageUrl: '/assets/products/' + req.file.filename, 
             });
 
@@ -108,17 +108,21 @@ router.post('/add', auth, (req, res, next) => {
     });
 });
 
-// GET /api/product/:category - Get products by category (for dynamic rendering - Issue #8)
+// GET /api/product/:category - Get products by category (for dynamic rendering - Issue #3, #8)
 router.get('/:category', async (req, res) => {
     try {
         const category = req.params.category.toLowerCase();
         
-        const validCategories = ['saree', 'artifacts', 'lifestyle'];
+        // Allows filtering by the categories used in your schema
+        const validCategories = ['saree', 'artifacts', 'lifestyle']; 
         if (!validCategories.includes(category)) {
-            return res.status(404).json({ message: 'Invalid category specified.' });
+            // Include a fallback to prevent arbitrary DB queries
+             if(category !== 'other') { // Allow 'other' to fetch products not categorized for display pages.
+                return res.status(404).json({ message: 'Invalid category specified.' });
+            }
         }
         
-        // Fetches all products of the given category
+        // Fetch products, sorting by creation date to show new items first
         const products = await Product.find({ category: category }).sort({ createdAt: -1 });
 
         res.json({ products });

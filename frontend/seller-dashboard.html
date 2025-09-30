@@ -48,11 +48,6 @@
 <body class="shop-body">
 
     <div class="dashboard-container">
-        <h1>Seller Dashboard</h1>
-        <p id="welcomeMessage">Loading...</p>
-        
-        <div id="sellerStatus" class="modal-message" style="color:red;"></div>
-        
         <form id="productForm" class="product-form" enctype="multipart/form-data">
             <h2>Add New Item for Sale</h2>
             <label for="productName">Item Name</label>
@@ -75,7 +70,7 @@
                 <option value="lifestyle">Lifestyle Picks</option>
             </select>
             
-            <label for="productImage">Product Image</label>
+            <label for="productImage">Product Image (Max 5MB)</label>
             <input type="file" id="productImage" name="productImage" accept="image/*" required>
             
             <button type="submit">Add Item</button>
@@ -96,11 +91,14 @@
             const sellerId = localStorage.getItem('currentSellerId'); 
             const welcomeMessage = safeGetElement('welcomeMessage');
             const sellerStatus = safeGetElement('sellerStatus');
-
+            
+            // Issue #4 Fix: Prevent unwanted logout if token exists
             if (!token || !user || (user.role !== 'seller' && user.role !== 'admin')) {
+                // Only redirect if no session exists or role is wrong
                 alert('Access Denied. Please log in as a Seller.');
                 window.location.replace('shop-now.html'); 
             } else {
+                // ... (existing welcome logic)
                 welcomeMessage.textContent = `Welcome to your Seller Dashboard, ${user.name} (${user.email}).`;
                 if (user.status && user.status === 'pending') {
                     sellerStatus.textContent = "Your account status is currently 'pending review'. You can add products, but listings may not appear immediately.";
@@ -123,20 +121,33 @@
                         return;
                     }
                     
+                    // Build FormData object for multipart submission (including file)
                     const formData = new FormData();
                     formData.append('sellerId', sellerId);
                     formData.append('productName', document.getElementById('productName').value);
                     formData.append('description', document.getElementById('productDesc').value);
-                    formData.append('price', parseFloat(document.getElementById('productPrice').value).toFixed(2));
+                    // Pass price as string, validation happens on backend
+                    formData.append('price', document.getElementById('productPrice').value); 
                     formData.append('category', category);
-                    formData.append('productImage', document.getElementById('productImage').files[0]);
+                    // Append the file (Issue #7)
+                    if (document.getElementById('productImage').files.length > 0) {
+                        formData.append('productImage', document.getElementById('productImage').files[0]);
+                    } else {
+                         listingMsg.textContent = "Error: Please select a product image.";
+                         listingMsg.style.color = 'red';
+                         return;
+                    }
                     
                     listingMsg.textContent = `Adding product...`;
                     listingMsg.style.color = 'orange';
 
-                    fetch('/api/product/add', { 
+                    fetch('/api/product/add', { // Correct API endpoint
                         method: 'POST',
-                        body: formData
+                        // Crucial: Do NOT set Content-Type header manually for FormData
+                        headers: { 
+                            'Authorization': `Bearer ${token}` // Pass auth token
+                        },
+                        body: formData // FormData handles the multipart format
                     })
                     .then(res => res.json())
                     .then(data => {
@@ -145,24 +156,30 @@
                             listingMsg.style.color = '#3A4D39'; 
                             productForm.reset();
                             
+                            // Near instant redirection after successful listing (Issue #1, #8)
                             setTimeout(() => {
+                                // Redirect to the relevant category page
                                 window.location.href = `${category}.html`;
-                            }, 1000);
+                            }, 10); 
 
                         } else {
                             listingMsg.textContent = data.message || "Failed to list product.";
                             listingMsg.style.color = 'red';
+                            // Clear file input on error to allow re-selection
+                            document.getElementById('productImage').value = '';
                         }
                     })
                     .catch(err => {
                         console.error('Product listing fetch error:', err);
                         listingMsg.textContent = "Network error. Could not reach server.";
                         listingMsg.style.color = 'red';
+                        document.getElementById('productImage').value = '';
                     });
                 });
             }
         });
         
+        // This makes sure the logout is globally accessible and effective (Issue #4)
         window.logout = window.logout || (() => {
             localStorage.removeItem('token');
             localStorage.removeItem('user');

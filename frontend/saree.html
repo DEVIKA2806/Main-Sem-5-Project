@@ -369,38 +369,65 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script src="script.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const productGrid = document.getElementById('product-grid');
-      
-      fetch('/api/product')
-        .then(response => response.json())
-        .then(products => {
-          const sareeProducts = products.filter(product => product.category === 'saree');
-          sareeProducts.forEach(product => {
-            const col = document.createElement('div');
-            col.className = 'col';
-            col.innerHTML = `
-              <div class="card h-100">
-                <img src="/${product.imageUrl.replace(/\\/g, '/')}" class="card-img-top" alt="${product.title}">
-                <div class="card-body">
-                  <h5 class="card-title">${product.title}</h5>
-                  <p class="card-text">${product.description}</p>
-                  <p class="fw-bold">₹${product.price}</p>
-                  <button class="btn-green" data-product-id="${product._id}" data-title="${product.title}" data-price="${product.price}" data-image-url="/${product.imageUrl.replace(/\\/g, '/')}">Add to Cart</button>
-                </div>
-              </div>
-            `;
-            const existingCount = productGrid.children.length;
-            const randomIndex = Math.floor(Math.random() * (existingCount + 1));
-            if (randomIndex === existingCount) {
-              productGrid.appendChild(col);
-            } else {
-              productGrid.insertBefore(col, productGrid.children[randomIndex]);
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const productContainer = document.getElementById('product-listing-container');
+            const loadingMessage = document.getElementById('loadingMessage');
+            
+            async function fetchAndRenderProducts(category) {
+                if (productContainer) productContainer.innerHTML = ''; // Clear existing content
+                if (loadingMessage) loadingMessage.textContent = `Loading ${category} Collection...`;
+
+                try {
+                    // Calls the new backend route (Issue #3, #8)
+                    const response = await fetch(`/api/product/${category}`);
+                    const data = await response.json();
+
+                    if (response.ok && data.products) {
+                        if (data.products.length > 0) {
+                            productContainer.innerHTML = ''; // Clear loading message
+                            data.products.forEach(product => {
+                                // Dynamically generates the product card HTML
+                                const productCard = `
+                                    <div class="col-lg-4 col-md-6 mb-4">
+                                        <div class="card h-100">
+                                            <img class="card-img-top" src="${product.imageUrl}" alt="${product.title}" style="height: 200px; object-fit: cover;">
+                                            <div class="card-body">
+                                                <h4 class="card-title">${product.title}</h4>
+                                                <h5>₹${product.price.toFixed(2)}</h5>
+                                                <p class="card-text">${product.description || 'No description provided.'}</p>
+                                            </div>
+                                            <div class="card-footer">
+                                                <a href="#" 
+                                                   class="btn-green" 
+                                                   data-product-id="${product._id}" 
+                                                   data-title="${product.title}" 
+                                                   data-price="${product.price}"
+                                                   data-image-url="${product.imageUrl}">
+                                                    Add to Cart
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                productContainer.insertAdjacentHTML('beforeend', productCard); 
+                            });
+                        } else {
+                            productContainer.innerHTML = '<p>No items found in this collection yet.</p>';
+                        }
+                    } else {
+                        productContainer.innerHTML = '<p style="color:red;">Failed to load products: ' + (data.message || 'Server error.') + '</p>';
+                    }
+                } catch (err) {
+                    console.error('Network Error:', err);
+                    if (productContainer) productContainer.innerHTML = '<p style="color:red;">Network error. Could not reach product server.</p>';
+                }
             }
-          });
+            
+            // Set the category based on the current page file name
+            const pageName = window.location.pathname.split('/').pop().split('.')[0];
+            fetchAndRenderProducts(pageName); 
         });
-    });
-  </script>
+    </script>
 </body>
 </html>
