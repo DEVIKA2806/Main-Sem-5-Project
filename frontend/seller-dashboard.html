@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hand2Heart - Seller Board</title>
-    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         .dashboard-container {
@@ -53,7 +53,7 @@
         
         <div id="sellerStatus" class="modal-message" style="color:red;"></div>
         
-        <form id="productForm" class="product-form">
+        <form id="productForm" class="product-form" enctype="multipart/form-data">
             <h2>Add New Item for Sale</h2>
             <label for="productName">Item Name</label>
             <input type="text" id="productName" placeholder="e.g., Hand-painted Ceramic Vase" required>
@@ -75,90 +75,100 @@
                 <option value="lifestyle">Lifestyle Picks</option>
             </select>
             
+            <label for="productImage">Product Image</label>
+            <input type="file" id="productImage" name="productImage" accept="image/*" required>
+            
             <button type="submit">Add Item</button>
         </form>
 
         <p id="listingMsg" class="modal-message"></p>
         <button onclick="logout()" style="background-color: #d9534f; margin-top: 20px;">Logout from Seller Account</button>
+        <button onclick="window.location.href='shop-now.html'" style="background-color: #3A4D39; margin-top: 10px;">Go back to main page</button>
     </div>
 
     <script src="script.js"></script>
     <script>
-        const safeGetElement = (id) => document.getElementById(id);
-        const productForm = safeGetElement('productForm');
-        const user = JSON.parse(localStorage.getItem('user'));
-        const token = localStorage.getItem('token');
-        const sellerId = localStorage.getItem('currentSellerId'); 
-        const welcomeMessage = safeGetElement('welcomeMessage');
-        const sellerStatus = safeGetElement('sellerStatus');
+        document.addEventListener('DOMContentLoaded', () => {
+            const safeGetElement = (id) => document.getElementById(id);
+            const productForm = safeGetElement('productForm');
+            const user = JSON.parse(localStorage.getItem('user'));
+            const token = localStorage.getItem('token');
+            const sellerId = localStorage.getItem('currentSellerId'); 
+            const welcomeMessage = safeGetElement('welcomeMessage');
+            const sellerStatus = safeGetElement('sellerStatus');
 
-        // Initial check on page load to ensure seller is logged in
-        if (!token || !user || (user.role !== 'seller' && user.role !== 'admin')) {
-            alert('Access Denied. Please log in as a Seller.');
-            // Use window.location.replace to prevent back button issues
-            window.location.replace('shop-now.html'); 
-        } else {
-             welcomeMessage.textContent = `Welcome to your Seller Dashboard, ${user.name} (${user.email}).`;
-             // Check the status which is now included in the local storage user object
-             if (user.status && user.status === 'pending') {
-                 sellerStatus.textContent = "Your account status is currently 'pending review'. You can add products, but listings may not appear immediately.";
-             } else {
-                 sellerStatus.textContent = "Your account is active. Start listing your products!";
-                 sellerStatus.style.color = 'green';
-             }
-        }
-
-
-        if (productForm) {
-            productForm.addEventListener('submit', function(event) {
-                event.preventDefault();
-                
-                const listingMsg = document.getElementById('listingMsg');
-                
-                if (!sellerId) {
-                    listingMsg.textContent = "Error: Seller ID not found. Please log in again.";
-                    listingMsg.style.color = 'red';
-                    return;
+            if (!token || !user || (user.role !== 'seller' && user.role !== 'admin')) {
+                alert('Access Denied. Please log in as a Seller.');
+                window.location.replace('shop-now.html'); 
+            } else {
+                welcomeMessage.textContent = `Welcome to your Seller Dashboard, ${user.name} (${user.email}).`;
+                if (user.status && user.status === 'pending') {
+                    sellerStatus.textContent = "Your account status is currently 'pending review'. You can add products, but listings may not appear immediately.";
+                } else {
+                    sellerStatus.textContent = "Your account is active. Start listing your products!";
+                    sellerStatus.style.color = 'green';
                 }
-                
-                const productData = {
-                    sellerId: sellerId,
-                    productName: document.getElementById('productName').value,
-                    description: document.getElementById('productDesc').value,
-                    price: parseFloat(document.getElementById('productPrice').value).toFixed(2),
-                    category: document.getElementById('productCategory').value 
-                };
-                
-                listingMsg.textContent = `Adding product...`;
-                listingMsg.style.color = 'orange';
+            }
 
-                // --- MERN Backend Fetch Call: /api/product/add ---
-                fetch('/api/product/add', { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(productData)
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.product) {
-                        listingMsg.textContent = data.message;
-                        listingMsg.style.color = '#3A4D39'; 
-                        productForm.reset();
-                    } else {
-                        listingMsg.textContent = data.message || "Failed to list product.";
+            if (productForm) {
+                productForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    
+                    const listingMsg = document.getElementById('listingMsg');
+                    const category = document.getElementById('productCategory').value;
+                    
+                    if (!sellerId) {
+                        listingMsg.textContent = "Error: Seller ID not found. Please log in again.";
                         listingMsg.style.color = 'red';
+                        return;
                     }
-                })
-                .catch(err => {
-                    console.error('Product listing fetch error:', err);
-                    listingMsg.textContent = "Network error. Could not reach server.";
-                    listingMsg.style.color = 'red';
+                    
+                    const formData = new FormData();
+                    formData.append('sellerId', sellerId);
+                    formData.append('productName', document.getElementById('productName').value);
+                    formData.append('description', document.getElementById('productDesc').value);
+                    formData.append('price', parseFloat(document.getElementById('productPrice').value).toFixed(2));
+                    formData.append('category', category);
+                    formData.append('productImage', document.getElementById('productImage').files[0]);
+                    
+                    listingMsg.textContent = `Adding product...`;
+                    listingMsg.style.color = 'orange';
+
+                    fetch('/api/product/add', { 
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.product) {
+                            listingMsg.textContent = data.message;
+                            listingMsg.style.color = '#3A4D39'; 
+                            productForm.reset();
+                            
+                            setTimeout(() => {
+                                window.location.href = `${category}.html`;
+                            }, 1000);
+
+                        } else {
+                            listingMsg.textContent = data.message || "Failed to list product.";
+                            listingMsg.style.color = 'red';
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Product listing fetch error:', err);
+                        listingMsg.textContent = "Network error. Could not reach server.";
+                        listingMsg.style.color = 'red';
+                    });
                 });
-            });
-        }
+            }
+        });
         
-        // Expose the global logout function from script.js to the dashboard buttons
-        window.logout = window.logout || logout; 
+        window.logout = window.logout || (() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('currentSellerId');
+            window.location.href = 'shop-now.html';
+        }); 
     </script>
 </body>
 </html>
