@@ -18,11 +18,11 @@ function getLoggedInUser() {
     const user = JSON.parse(localStorage.getItem('user'));
     const token = localStorage.getItem('token');
     
-    if (token && user && !user.role) {
-        user.role = 'user';
+    if (token && user) {
+        return user
     }
     
-    return user;
+    return null;
 }
 
 
@@ -153,7 +153,7 @@ function logout() {
     updateCartCount();
     closeLogin();
     setTimeout(() => {
-        window.location.reload(); 
+        window.location.href = 'shop-now.html';
     }, 100);
 }
 
@@ -167,14 +167,22 @@ function openLogin() {
     const loginCard = loginModal.querySelector('.login-card');
     
     if (user) {
-        loginCard.innerHTML = `
-            <h3>Welcome Back, ${user.name}!</h3>
-            <p>Role: ${user.role}</p>
-            ${(user.role === 'seller' || user.role === 'admin') ? 
-                '<button onclick="window.location.href=\'seller-dashboard.html\'">Go to Dashboard</button>' : ''}
-            <button onclick="logout()">Log Out</button>
-            <button class="close-btn" onclick="closeLogin()">Close</button>
-        `;
+        if(user.role === 'seller' || user.role === 'admin') {
+             loginCard.innerHTML = `
+                <h3>Welcome Back, ${user.name}!</h3>
+                <p>You are logged in as a Seller/Admin.</p>
+                <p>Please log out from the seller dashboard to log in as a user.</p>
+                <button onclick="window.location.href='seller-dashboard.html'">Go to Dashboard</button>
+                <button class="close-btn" onclick="closeLogin()">Close</button>
+            `;
+        } else {
+             loginCard.innerHTML = `
+                <h3>Welcome Back, ${user.name}!</h3>
+                <p>Role: ${user.role}</p>
+                <button onclick="logout()">Log Out</button>
+                <button class="close-btn" onclick="closeLogin()">Close</button>
+            `;
+        }
     } else {
         loginCard.innerHTML = `
             <h3>User Login</h3>
@@ -315,10 +323,14 @@ function validateSellerLogin() {
 }
 
 function openSeller() {
+    const user = getLoggedInUser();
+    if(user && (user.role === 'seller' || user.role === 'admin')){
+        window.location.href = 'seller-dashboard.html';
+        return;
+    }
     const sellerModal = safeGetElement('sellerModal');
     if (!sellerModal) return;
 
-    const user = getLoggedInUser(); 
     const modalCard = sellerModal.querySelector('.modal-card');
     
     // Updated registration form HTML
@@ -529,38 +541,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Find Add to Cart buttons on product pages (like saree.html)
-    const productListings = document.querySelectorAll('.main-content .col, .shop-item .item');
-
-    productListings.forEach(listing => {
-        const button = listing.querySelector('.btn-green'); 
-
+    document.body.addEventListener('click', function(e) {
+        const button = e.target.closest('.btn-green');
         if (button && button.textContent.trim() === 'Add to Cart') {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const container = this.closest('.card') || this.closest('.item'); 
-                if (!container) return;
+            e.preventDefault();
+            
+            const productId = button.dataset.productId;
+            const title = button.dataset.title;
+            const price = button.dataset.price;
+            const imageUrl = button.dataset.imageUrl;
 
-                const titleElement = container.querySelector('.card-title') || container.querySelector('p:not(.fw-bold)');
-                const priceElement = container.querySelector('.fw-bold') || container.querySelector('p:not(.card-text):not(:first-child)'); 
-                const imageElement = container.querySelector('img');
-
-                const title = titleElement?.textContent.trim() || 'Untitled Product';
-                const priceText = priceElement?.textContent.replace(/[^0-9.]/g, '').trim(); 
-                const price = priceText ? parseFloat(priceText) : NaN;
-                
-                const imageUrl = imageElement?.src || '';
-                const baseProductId = title.replace(/\s/g, '_').toLowerCase(); 
-                const productId = baseProductId + '-' + Math.random().toString(36).substr(2, 5); 
-
-                if (isNaN(price)) {
-                     console.error('Invalid price for item:', title);
-                     alert('Cannot add item: Invalid price.');
-                     return;
-                }
-                
+            if (productId && title && price && imageUrl) {
                 addToCart(productId, title, price, imageUrl);
-            });
+            }
         }
     });
 });

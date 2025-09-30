@@ -3,6 +3,19 @@ const Product = require('../models/Product');
 const auth = require('../middleware/auth');
 const router = express.Router();
 const mongoose = require('mongoose'); // NEW: Need Mongoose for ID validation
+const multer = require('multer');
+
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/')
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname)
+    }
+});
+
+const upload = multer({ storage: storage });
 
 // GET /api/product/ - Fetch ALL products (used by the shop page)
 router.get('/', async (req, res) => {
@@ -22,20 +35,20 @@ router.post('/', auth, async (req, res) => {
     // However, since the Mongoose model requires sellerId, it must be in the body.
     try {
         const { title, description, price, category, imageUrl, stock, sellerId } = req.body; // CHANGE 1: Added sellerId
-        
+
         // Validation check for new required field
         if (!sellerId || !mongoose.Types.ObjectId.isValid(sellerId)) { // CHANGE 2: Validation check
             return res.status(400).json({ message: 'Missing or invalid sellerId is required for product creation.' });
         }
 
-        const p = new Product({ 
+        const p = new Product({
             sellerId, // CHANGE 3: Include the required sellerId
-            title, 
-            description, 
-            price, 
-            category, 
-            imageUrl, 
-            stock 
+            title,
+            description,
+            price,
+            category,
+            imageUrl,
+            stock
         });
         await p.save();
         res.status(201).json(p);
@@ -49,9 +62,11 @@ router.post('/', auth, async (req, res) => {
 // ... existing routes (/ and /) ...
 
 // NEW ROUTE: POST /api/product/add - Dedicated route for the Seller Dashboard
-router.post('/add', async (req, res) => {
-    const { sellerId, productName, description, price, category } = req.body; 
+router.post('/add', upload.single('productImage'), async (req, res) => {
+    const { sellerId, productName, description, price, category } = req.body;
     const numericPrice = parseFloat(price);
+    const imageUrl = req.file ? req.file.path : '';
+
 
     // 1. Basic Validation
     if (!sellerId || !mongoose.Types.ObjectId.isValid(sellerId)) {
@@ -83,8 +98,8 @@ router.post('/add', async (req, res) => {
     }
 
     if (numericPrice < minPrice || numericPrice > maxPrice) {
-        return res.status(400).json({ 
-            message: `The price of ₹${numericPrice.toFixed(2)} is outside the allowed range (₹${minPrice}-₹${maxPrice}) for the "${category}" category.` 
+        return res.status(400).json({
+            message: `The price of ₹${numericPrice.toFixed(2)} is outside the allowed range (₹${minPrice}-₹${maxPrice}) for the "${category}" category.`
         });
     }
 
@@ -92,17 +107,18 @@ router.post('/add', async (req, res) => {
         // 3. Create new product entry
         const newProduct = new Product({
             sellerId,
-            title: productName, 
+            title: productName,
             description,
-            price: numericPrice, 
-            category
+            price: numericPrice,
+            category,
+            imageUrl
         });
 
         const savedProduct = await newProduct.save();
 
-        res.status(201).json({ 
-            message: `Product "${productName}" successfully added to the "${category}" collection!`, 
-            product: savedProduct 
+        res.status(201).json({
+            message: `Product "${productName}" successfully added to the "${category}" collection!`,
+            product: savedProduct
         });
 
     } catch (error) {
@@ -131,43 +147,5 @@ router.delete('/:id', auth, async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
-
-// POST /api/product/add - Handles new product listings from the seller dashboard
-// router.post('/add', async (req, res) => {
-//     // In a real application, you'd perform proper authentication (e.g., check JWT token)
-//     // to verify the seller is logged in and their account is 'active'.
-    
-//     const { sellerId, productName, description, price, category } = req.body;
-
-//     if (!sellerId || !productName || !description || !price || !category) {
-//         return res.status(400).json({ message: 'Missing required product fields.' });
-//     }
-
-//     try {
-//         // Create the new product object
-//         const newProduct = new Product({
-//             sellerId: sellerId,
-//             title: productName,
-//             description: description,
-//             price: parseFloat(price),
-//             category: category.toLowerCase(), // Ensure lowercase for enum match
-//             // NOTE: In a complete implementation, an image upload service would provide a real URL.
-//             imageUrl: `/assets/${category}-default.jpg`, 
-//             stock: 100 // Default stock
-//         });
-
-//         // Simulating the database save operation and getting a MongoDB ID
-//         const savedProduct = await newProduct.save();
-
-//         res.status(201).json({ 
-//             message: `Product "${productName}" added successfully to category "${category}".`,
-//             product: savedProduct
-//         });
-
-//     } catch (error) {
-//         console.error('Product Add Error:', error);
-//         res.status(500).json({ message: 'Internal server error during product listing. Check your database connection and schema constraints.' });
-//     }
-// });
 
 module.exports = router;

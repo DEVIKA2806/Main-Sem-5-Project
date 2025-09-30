@@ -5,16 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hand2Heart - Saree "Simple and Elegant Handmade Sarees"</title>
 
-  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   
-  <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-  <!-- Custom Shop CSS -->
   <link rel="stylesheet" href="saree.css">
 </head>
 <body class="shop-body">
@@ -27,15 +23,6 @@
             <ul>
                 <li><a href="shop-now.html">Home</a></li>
                 <li>|</li>
-                <!-- <li class="dropdown">
-                    <a href="#" onclick="toggleDropdown()">Items <i class="fa fa-caret-down"></i></a>
-                    <ul id="itemsDropdown" class="dropdown-content">
-                        <li><a href="#">Handmade Bags</a></li>
-                        <li><a href="#">Decor Items</a></li>
-                        <li><a href="#">Jewelry</a></li>
-                        <li><a href="#">Home Essentials</a></li>
-                    </ul>
-                </li> -->
                 <li><a href="#">Items</a></li>
                 <li>|</li>
                 <li><a href="#">About Us</a></li>
@@ -50,14 +37,13 @@
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span id="cart-count">0</span>
             </div>
-            <div class="login">
+            <div id="navLoginContainer">
                 <button class="login" onclick="openLogin()"><i class="fa-solid fa-user"></i></button>
             </div>
         </div>
 
     </div>
 
-  <!-- Search Bar -->
   <div class="container mt-4 shop-search">
     <input type="text" placeholder="Search for items...">
     <button>Search</button>
@@ -80,12 +66,13 @@
             <button class="close-btn" onclick="closeLogin()">Close</button>
         </div>
     </div>
+    <div id="sellerModal" class="login-modal">
+      <div class="modal-card"></div>
+    </div>
 
-  <!-- Shop Layout -->
   <div class="container-fluid mt-4">
     <div class="row">
       
-      <!-- Sidebar Filters -->
       <aside class="col-md-3 p-3 bg-light rounded">
         <h5>Filters</h5>
         
@@ -119,12 +106,9 @@
         </ul>
       </aside>
 
-      <!-- Products Grid -->
       <main class="col-md-9">
-        <div class="row row-cols-1 row-cols-md-3 g-4">
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="product-grid">
           
-          <!-- Product 1 -->
-
           <div class="col">
             <div class="card h-100">
               <img src="../assets/bandhani1-img.jpg" class="card-img-top" alt="Leheriya Bandhani Saree">
@@ -132,7 +116,7 @@
                 <h5 class="card-title">Leheriya Bandhani</h5>
                 <p class="card-text">A vibrant tie-dye saree combining wave-like 'Leheriya' stripes and intricate 'Bandhani' dot work.</p>
                 <p class="fw-bold">₹6,500</p>
-                <button class="btn-green" onclick="addToCart('bandhani1','Bandhani Saree', '6500', '../assets/bandhani1-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="bandhani1" data-title="Bandhani Saree" data-price="6500" data-image-url="../assets/bandhani1-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -144,7 +128,7 @@
                 <h5 class="card-title">Kanjivaram</h5>
                 <p class="card-text">A timeless Kanjivaram featuring a classic combination of woven checks and stripes.</p>
                 <p class="fw-bold">₹8,200</p>
-                <button class="btn-green" onclick="addToCart('kanjivaram1','Kanjivaram Saree', '8200', '../assets/kanjivaram1-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="kanjivaram1" data-title="Kanjivaram Saree" data-price="8200" data-image-url="../assets/kanjivaram1-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -156,7 +140,7 @@
                 <h5 class="card-title">Paithani</h5>
                 <p class="card-text">Handwoven silk saree with a signature peacock-designed pallu.</p>
                 <p class="fw-bold">₹8,200</p>
-                <button class="btn-green" onclick="addToCart('paithani1','Paithani Saree', '8200', '../assets/paithani1-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="paithani1" data-title="Paithani Saree" data-price="8200" data-image-url="../assets/paithani1-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -169,7 +153,7 @@
                 <h5 class="card-title">Bandhani</h5>
                 <p class="card-text">A luxurious Bandhani featuring extremely fine and dense tie-dye patterns for a shimmering effect.</p>
                 <p class="fw-bold">₹7,800</p>
-                <button class="btn-green" onclick="addToCart('bandhani2','Bandhani Saree', '7800', '../assets/bandhani2-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="bandhani2" data-title="Bandhani Saree" data-price="7800" data-image-url="../assets/bandhani2-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -182,7 +166,7 @@
                 <h5 class="card-title">Patola</h5>
                 <p class="card-text">An heirloom silk saree from Patan, woven with the complex double ikat technique.</p>
                 <p class="fw-bold">₹8,500</p>
-                <button class="btn-green" onclick="addToCart('patola1','Patola Saree', '8500', '../assets/patola1-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="patola1" data-title="Patola Saree" data-price="8500" data-image-url="../assets/patola1-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -194,7 +178,7 @@
                 <h5 class="card-title">Kanjivaram</h5>
                 <p class="card-text">A classic Kanjivaram with an elegant body beautifully contrasted by an elaborately woven pallu.</p>
                 <p class="fw-bold">₹10,500</p>
-                <button class="btn-green" onclick="addToCart('kanjivaram2','Kanjivaram Saree', '10500', '../assets/kanjivaram2-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="kanjivaram2" data-title="Kanjivaram Saree" data-price="10500" data-image-url="../assets/kanjivaram2-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -206,12 +190,11 @@
                 <h5 class="card-title">Banarasi</h5>
                 <p class="card-text">An ethereal Banarasi saree, woven with fine metallic threads for a delicate, shimmering finish.</p>
                 <p class="fw-bold">₹5,500</p>
-                <button class="btn-green" onclick="addToCart('banarsi1','Banarsi Saree', '5500', '../assets/banarsi-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="banarsi1" data-title="Banarsi Saree" data-price="5500" data-image-url="../assets/banarsi-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
 
-          <!-- Product 2 -->
           <div class="col">
             <div class="card h-100">
               <img src="../assets/paithani2-img.jpg" class="card-img-top" alt="Saree">
@@ -219,7 +202,7 @@
                 <h5 class="card-title">Paithani</h5>
                 <p class="card-text">Exquisite silk Paithani featuring intricate, handwoven lotus motifs on the pallu.</p>
                 <p class="fw-bold">₹1,500</p>
-                <button class="btn-green" onclick="addToCart('paithani2','Paithani Saree', '1500', '../assets/paithani2-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="paithani2" data-title="Paithani Saree" data-price="1500" data-image-url="../assets/paithani2-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -231,7 +214,7 @@
                 <h5 class="card-title">Patola</h5>
                 <p class="card-text">A traditional Patola featuring the intricate 'Vohra Gaji Bhaat' elephant and floral design.</p>
                 <p class="fw-bold">₹6,999</p>
-                <button class="btn-green" onclick="addToCart('patola2','Patola Saree', '6999', '../assets/patola2-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="patola2" data-title="Patola Saree" data-price="6999" data-image-url="../assets/patola2-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -244,7 +227,7 @@
                 <h5 class="card-title">Banarasi</h5>
                 <p class="card-text">A lightweight and sheer Kora Organza saree, celebrated for its crisp texture and shimmering zari work.</p>
                 <p class="fw-bold">₹5,800</p>
-                <button class="btn-green" onclick="addToCart('banarsi2','Banarsi Saree', '5800', '../assets/banarsi2-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="banarsi2" data-title="Banarsi Saree" data-price="5800" data-image-url="../assets/banarsi2-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -256,12 +239,11 @@
                 <h5 class="card-title">Bandhani</h5>
                 <p class="card-text">A rare and intricate Bandhani style featuring detailed motifs of animals, birds, and human figures, showcasing master craftsmanship.</p>
                 <p class="fw-bold">₹7,800</p>
-                <button class="btn-green" onclick="addToCart('bandhani3','Bandhani Saree', '7800', '../assets/bandhani3-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="bandhani3" data-title="Bandhani Saree" data-price="7800" data-image-url="../assets/bandhani3-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
 
-          <!-- Product 3 -->
           <div class="col">
             <div class="card h-100">
               <img src="../assets/paithani3-img.jpg" class="card-img-top" alt="Saree">
@@ -269,7 +251,7 @@
                 <h5 class="card-title">Paithani</h5>
                 <p class="card-text">A magnificent silk Paithani, elevated with intricate brocade work for a rich, textured finish.</p>
                 <p class="fw-bold">₹2,500</p>
-                <button class="btn-green" onclick="addToCart('paithani3','Paithani Saree', '2500', '../assets/paithani3-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="paithani3" data-title="Paithani Saree" data-price="2500" data-image-url="../assets/paithani3-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -281,12 +263,11 @@
                 <h5 class="card-title">Patola</h5>
                 <p class="card-text">A vibrant Patola featuring the auspicious 'Navratna' pattern, woven with nine distinct colors.</p>
                 <p class="fw-bold">₹5,000</p>
-                <button class="btn-green" onclick="addToCart('patola3','Patola Saree', '5000', '../assets/patola3-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="patola3" data-title="Patola Saree" data-price="5000" data-image-url="../assets/patola3-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
 
-          <!-- Product 4 -->
           <div class="col">
             <div class="card h-100">
               <img src="../assets/paithani4-img.jpg" class="card-img-top" alt="Saree">
@@ -294,12 +275,11 @@
                 <h5 class="card-title">Paithani</h5>
                 <p class="card-text">A traditional Paithani distinguished by its charming 'Muniya' (parrot) motifs woven along the border.</p>
                 <p class="fw-bold">₹2,800</p>
-                <button class="btn-green" onclick="addToCart('paithani4','Paithani Saree', '2800', '../assets/paithani4-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="paithani4" data-title="Paithani Saree" data-price="2800" data-image-url="../assets/paithani4-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
 
-          <!-- Product 8 -->
           <div class="col">
             <div class="card h-100">
               <img src="../assets/banarsi3-img.jpg" class="card-img-top" alt="Katan Banarasi Saree">
@@ -307,12 +287,11 @@
                 <h5 class="card-title">Banarasi</h5>
                 <p class="card-text">A quintessential masterpiece crafted from pure Katan silk for a durable and lustrous drape.</p>
                 <p class="fw-bold">₹7,200</p>
-                <button class="btn-green" onclick="addToCart('banarsi3','Banarsi Saree', '7200', '../assets/banarsi3-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="banarsi3" data-title="Banarsi Saree" data-price="7200" data-image-url="../assets/banarsi3-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
 
-          <!-- Product 9 -->
           <div class="col">
             <div class="card h-100">
               <img src="../assets/banarsi4-img.jpg" class="card-img-top" alt="Georgette Banarasi Saree">
@@ -320,12 +299,11 @@
                 <h5 class="card-title">Banarasi</h5>
                 <p class="card-text">A gracefully flowing saree crafted from lightweight georgette with delicate Banarasi zari work.</p>
                 <p class="fw-bold">₹8,500</p>
-                <button class="btn-green" onclick="addToCart('banarsi4','Banarsi Saree', '8500', '../assets/banarsi4-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="banarsi4" data-title="Banarsi Saree" data-price="8500" data-image-url="../assets/banarsi4-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
 
-          <!-- Product 10 -->
           <div class="col">
             <div class="card h-100">
               <img src="../assets/kanjivaram3-img.jpg" class="card-img-top" alt="Lightweight Kanjivaram Saree">
@@ -333,7 +311,7 @@
                 <h5 class="card-title">Lightweight Kanjivaram</h5>
                 <p class="card-text">A contemporary Kanjivaram silk saree, reinterpreted with a lighter weave for comfortable elegance.</p>
                 <p class="fw-bold">₹9,500</p>
-                <button class="btn-green" onclick="addToCart('kanjivaram3','Kanjivaram Saree', '9500', '../assets/kanjivaram3-img.jpg')">Add to Cart</button>
+                <button class="btn-green" data-product-id="kanjivaram3" data-title="Kanjivaram Saree" data-price="9500" data-image-url="../assets/kanjivaram3-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -343,11 +321,9 @@
     </div>
   </div>
 
-  <!-- footer -->
-    <footer class="site-footer">
+  <footer class="site-footer">
         <div class="footer-container">
 
-            <!-- About Us -->
             <div class="footer-section">
             <h3>About Us</h3>
             <p>We aim to connect sellers and buyers through a simple and elegant platform. 
@@ -355,7 +331,6 @@
             </p>
             </div>
 
-            <!-- Quick Links -->
             <div class="footer-section">
             <h3>Quick Links</h3>
             <ul>
@@ -366,7 +341,6 @@
             </ul>
             </div>
 
-            <!-- Newsletter -->
             <div class="footer-section">
             <h3>Stay Updated</h3>
             <form id="newsletterForm">
@@ -376,7 +350,6 @@
             </form>
             </div>
 
-            <!-- Social -->
             <div class="footer-section">
             <h3>Follow Us</h3>
             <div class="social-links">
@@ -393,11 +366,41 @@
         </div>
     </footer>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Custom JS -->
   <script src="script.js"></script>
-  <script src="saree.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const productGrid = document.getElementById('product-grid');
+      
+      fetch('/api/product')
+        .then(response => response.json())
+        .then(products => {
+          const sareeProducts = products.filter(product => product.category === 'saree');
+          sareeProducts.forEach(product => {
+            const col = document.createElement('div');
+            col.className = 'col';
+            col.innerHTML = `
+              <div class="card h-100">
+                <img src="/${product.imageUrl.replace(/\\/g, '/')}" class="card-img-top" alt="${product.title}">
+                <div class="card-body">
+                  <h5 class="card-title">${product.title}</h5>
+                  <p class="card-text">${product.description}</p>
+                  <p class="fw-bold">₹${product.price}</p>
+                  <button class="btn-green" data-product-id="${product._id}" data-title="${product.title}" data-price="${product.price}" data-image-url="/${product.imageUrl.replace(/\\/g, '/')}">Add to Cart</button>
+                </div>
+              </div>
+            `;
+            const existingCount = productGrid.children.length;
+            const randomIndex = Math.floor(Math.random() * (existingCount + 1));
+            if (randomIndex === existingCount) {
+              productGrid.appendChild(col);
+            } else {
+              productGrid.insertBefore(col, productGrid.children[randomIndex]);
+            }
+          });
+        });
+    });
+  </script>
 </body>
 </html>
