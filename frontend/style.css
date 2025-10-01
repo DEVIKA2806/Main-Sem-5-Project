@@ -105,6 +105,10 @@ body {
     background-color:#3A4D39;
     font-size: 1.6rem;
     font-weight: 600;
+    display: flex;               /* make it flexbox */
+    align-items: center;         /* vertical center */
+    justify-content: center;     /* horizontal center */
+    cursor: pointer;             /* pointer effect */
 }
 
 .login:hover {
@@ -112,6 +116,7 @@ body {
     color: #3A4D39;
     height: 39px;
 }
+
 
 /* Dropdown container */
 .nav-items ul li.dropdown {
