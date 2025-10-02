@@ -59,7 +59,6 @@ app.use(express.static(FRONTEND_DIR));
 const ASSETS_DIR = path.join(__dirname, '../assets');
 app.use('/assets', express.static(ASSETS_DIR));
 
-
 // Fallback: index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
