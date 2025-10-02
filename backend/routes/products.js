@@ -1,8 +1,9 @@
+// backend/routes/products.js
 const express = require('express');
 const Product = require('../models/Product');
 const auth = require('../middleware/auth');
 const router = express.Router();
-const mongoose = require('mongoose'); // NEW: Need Mongoose for ID validation
+const mongoose = require('mongoose'); 
 const multer = require('multer');
 
 // Set up multer for file uploads
@@ -17,6 +18,26 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// NEW ROUTE: GET /api/product/:category - Fetch products by category (Request 5 Support)
+router.get('/:category', async (req, res) => {
+    try {
+        const { category } = req.params;
+        const validCategories = ['saree', 'artifacts', 'lifestyle', 'other'];
+
+        if (!validCategories.includes(category)) {
+            return res.status(400).json({ message: 'Invalid product category specified.' });
+        }
+
+        // Fetch products only for the specified category
+        const products = await Product.find({ category: category }).sort({ createdAt: -1 });
+        res.json({ products: products });
+    } catch (err) {
+        console.error('Fetch products by category error:', err);
+        res.status(500).json({ message: 'Server error while fetching category products.' });
+    }
+});
+
+
 // GET /api/product/ - Fetch ALL products (used by the shop page)
 router.get('/', async (req, res) => {
     try {
@@ -28,21 +49,17 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/product/ - Original Admin/Auth creation route (MODIFIED)
-// This route is now used primarily for admin/authorized users to add products.
-// It is kept for compatibility, but the 'sellerId' must now be included in the body.
 router.post('/', auth, async (req, res) => {
-    // NOTE: For an admin panel, you might still need to supply a sellerId or a default one.
-    // However, since the Mongoose model requires sellerId, it must be in the body.
     try {
-        const { title, description, price, category, imageUrl, stock, sellerId } = req.body; // CHANGE 1: Added sellerId
+        const { title, description, price, category, imageUrl, stock, sellerId } = req.body; 
 
         // Validation check for new required field
-        if (!sellerId || !mongoose.Types.ObjectId.isValid(sellerId)) { // CHANGE 2: Validation check
+        if (!sellerId || !mongoose.Types.ObjectId.isValid(sellerId)) { 
             return res.status(400).json({ message: 'Missing or invalid sellerId is required for product creation.' });
         }
 
         const p = new Product({
-            sellerId, // CHANGE 3: Include the required sellerId
+            sellerId, 
             title,
             description,
             price,
@@ -59,13 +76,13 @@ router.post('/', auth, async (req, res) => {
 });
 
 
-// ... existing routes (/ and /) ...
-
 // NEW ROUTE: POST /api/product/add - Dedicated route for the Seller Dashboard
+// FIX 7: Price validation implemented. FIX 6: Success message refined.
 router.post('/add', upload.single('productImage'), async (req, res) => {
     const { sellerId, productName, description, price, category } = req.body;
     const numericPrice = parseFloat(price);
-    const imageUrl = req.file ? req.file.path : '';
+    // Replace backslashes with forward slashes for URL compatibility
+    const imageUrl = req.file ? req.file.path.replace(/\\/g, '/') : ''; 
 
 
     // 1. Basic Validation
@@ -76,7 +93,7 @@ router.post('/add', upload.single('productImage'), async (req, res) => {
         return res.status(400).json({ message: 'Missing or invalid product details (Name, Price, Category).' });
     }
 
-    // 2. Price Range Validation (REQUIRED LOGIC)
+    // 2. Price Range Validation (Request 7)
     let minPrice, maxPrice;
     switch (category) {
         case 'saree':
@@ -91,15 +108,16 @@ router.post('/add', upload.single('productImage'), async (req, res) => {
             minPrice = 10;
             maxPrice = 1000;
             break;
-        case 'other': // Handled by default, assuming other categories have no strict range
+        case 'other':
         default:
             minPrice = 0;
             maxPrice = Number.MAX_SAFE_INTEGER;
     }
 
-    if (numericPrice < minPrice || numericPrice > maxPrice) {
+    if (category !== 'other' && (numericPrice < minPrice || numericPrice > maxPrice)) {
+        // Custom error message as requested
         return res.status(400).json({
-            message: `The price of ₹${numericPrice.toFixed(2)} is outside the allowed range (₹${minPrice}-₹${maxPrice}) for the "${category}" category.`
+            message: `The price of ₹${numericPrice.toFixed(2)} is outside the allowed range for the "${category}" collection. Please set a price between ₹${minPrice} and ₹${maxPrice}.`
         });
     }
 
@@ -116,8 +134,9 @@ router.post('/add', upload.single('productImage'), async (req, res) => {
 
         const savedProduct = await newProduct.save();
 
+        // FIX 6: Return success message as requested
         res.status(201).json({
-            message: `Product "${productName}" successfully added to the "${category}" collection!`,
+            message: `Product "${productName}" successfully added!`, 
             product: savedProduct
         });
 

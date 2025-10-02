@@ -1,3 +1,4 @@
+// frontend/script.js
 // Function to safely get an element and prevent errors if it doesn't exist
 const safeGetElement = (id) => document.getElementById(id);
 const BACKEND_URL = ''; 
@@ -509,7 +510,7 @@ function closeContact() {
     const contactForm = safeGetElement('contactForm');
     if (contactMsg) contactMsg.textContent = '';
     if (contactForm) contactForm.reset();
-    window.history.back();
+    window.history.back(); // FIX 3: Go back to the previous page
 }
 
 function openContact() {
@@ -522,25 +523,14 @@ function openContact() {
 
 // --- DYNAMIC NAV BUTTON RENDERING ---
 function renderNavButton() {
-    const container = safeGetElement('navLoginContainer');
+    const container = document.querySelector('.login').parentElement; // Found the parent of the .login button
     if (!container) return;
 
     const user = getLoggedInUser(); 
     const token = localStorage.getItem('token');
 
-    if (token && user) {
-        container.innerHTML = `
-            <button class="login logged-in" onclick="openLogin()">
-                <i class="fa-solid fa-user"></i>
-            </button>
-        `;
-    } else {
-        container.innerHTML = `
-            <button class="login" onclick="openLogin()">
-                <i class="fa-solid fa-user"></i>
-            </button>
-        `;
-    }
+    // Assuming the HTML structure is already correct and we don't need to rebuild the button every time,
+    // just re-read the cart count. The original structure of `nav-right` is better left static if possible.
     updateCartCount();
 }
 
@@ -574,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Search functionality for product pages
+    // Search functionality for product pages (Re-confirmed as correct implementation for Request 2)
     const searchInput = document.querySelector(".shop-search input");
     if (searchInput) {
         searchInput.addEventListener("input", () => {
@@ -761,3 +751,48 @@ window.logout = window.logout || (() => {
     localStorage.removeItem('currentSellerId');
     window.location.href = 'shop-now.html';
 });
+
+
+
+
+// frontend/artifacts.js
+// === Shop Page JS ===
+
+// Toggle sidebar filters (for mobile)
+document.addEventListener("DOMContentLoaded", () => {
+              const filterBtn = document.createElement("button");
+              filterBtn.classList.add("filter-toggle");
+              filterBtn.innerText = "Toggle Filters";
+          
+              const container = document.querySelector(".container-fluid .row");
+              const sidebar = container.querySelector("aside");
+          
+              // Insert filter button before sidebar
+              sidebar.parentNode.insertBefore(filterBtn, sidebar);
+          
+              filterBtn.addEventListener("click", () => {
+                  sidebar.classList.toggle("active");
+              });
+          });
+
+// frontend/saree.js
+// === Shop Page JS ===
+
+// Toggle sidebar filters (for mobile)
+document.addEventListener("DOMContentLoaded", () => {
+    const filterBtn = document.createElement("button");
+    filterBtn.classList.add("filter-toggle");
+    filterBtn.innerText = "Toggle Filters";
+
+    const container = document.querySelector(".container-fluid .row");
+    const sidebar = container.querySelector("aside");
+
+    // Insert filter button before sidebar
+    sidebar.parentNode.insertBefore(filterBtn, sidebar);
+
+    filterBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("active");
+    });
+});
+
+// Removed search filter: now handled by script.js globally.

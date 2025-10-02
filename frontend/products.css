@@ -1,3 +1,4 @@
+/* frontend/products.css */
 /* === Saree Page Custom Styles (saree.css) === */
 
 /* --- GENERAL & UTILITY STYLES --- */
@@ -87,30 +88,38 @@
     gap: 1.2rem;
 }
 
+/* FIX 4: Aligned Cart Icon */
 .cart {
   position: relative;
-  font-size: 1.5rem;
+  font-size: 1.8rem; 
   color: #ECE3CE;
   cursor: pointer;
   transition: 0.3s;
+  display: flex;
+  align-items: center;
 }
 
 .cart:hover {
   color: #3A4D39;
 }
 
+/* FIX 4: Better positioned Cart Count */
 #cart-count {
   position: absolute;
-  top: -8px;
-  right: -10px;
+  top: -10px; 
+  right: -10px; 
   background: #739072;
   color: white;
-  font-size: 12px;
+  font-size: 10px; 
   font-weight: bold;
   border-radius: 50%;
-  padding: 2px 6px;
+  padding: 3px 5px; 
+  line-height: 1; 
+  min-width: 18px; 
+  text-align: center;
 }
 
+/* FIX 4: Login button adjustments */
 .login {
     height: 40px;
     width: 40px;
@@ -132,12 +141,12 @@
 
 /* --- PAGE-SPECIFIC LAYOUT STYLES --- */
 
-/* Search Bar */
+/* FIX 1: Search Bar alignment and spacing adjustments */
 .shop-search {
   display: flex;
   justify-content: center;
   gap: 15px;
-  padding: 20px 0;
+  padding: 30px 20px; 
   max-width: 900px;
   margin: 0 auto;
 }
@@ -166,13 +175,14 @@
   background-color: #3A4D39;
 }
 
-/* Sidebar Filters */
+/* FIX 1: Sidebar Filters improved layout and margin */
 aside {
   background-color: #f8f8f8 !important; 
   border: 1px solid #ddd;
   border-radius: 10px;
   padding: 20px;
   height: fit-content;
+  margin: 0 15px 20px 15px; 
 }
 
 aside h5 {
@@ -200,7 +210,11 @@ aside ul li {
   margin-bottom: 5px;
 }
 
-/* Product Cards */
+/* FIX 1: Product Cards layout context/alignment adjustments for the grid */
+main {
+    padding: 0 15px;
+}
+
 main .card {
   border: 1px solid #ddd;
   border-radius: 10px;
@@ -208,6 +222,8 @@ main .card {
   transition: transform 0.2s, box-shadow 0.2s;
   overflow: hidden;
   background-color: #fff;
+  display: flex;
+  flex-direction: column;
 }
 
 main .card:hover {
@@ -225,6 +241,15 @@ main .card:hover {
   font-weight: 600;
 }
 
+.card-body {
+    flex-grow: 1; 
+}
+
+.card-footer {
+    padding-top: 10px;
+    background-color: white; 
+    border-top: none;
+}
 /* --- MODAL STYLES (Essential Base for Login/Seller Modals) --- */
 
 /* Common Modal Background Overlay */
@@ -378,7 +403,7 @@ main .card:hover {
   padding: 10px;
   cursor: pointer;
   font-size: 1rem;
-  transition: 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 
 #newsletterForm button:hover {

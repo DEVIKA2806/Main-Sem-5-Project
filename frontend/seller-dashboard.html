@@ -10,44 +10,108 @@
         .dashboard-container {
             max-width: 600px;
             margin: 50px auto;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            background-color: #fff;
-            margin-top: 100px; /* Push content down below navbar */
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3); 
+            background-color: #ECE3CE; 
+            margin-top: 150px; 
+            text-align: center;
         }
-        .product-form input, .product-form textarea, .product-form select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
+        .dashboard-container h1 {
+            color: #3A4D39;
+            margin-bottom: 5px;
+        }
+        .dashboard-container p {
+            color: #4F6F52;
+            margin-bottom: 25px;
         }
         .product-form label {
             display: block;
+            text-align: left;
+            margin-top: 15px;
             margin-bottom: 5px;
             font-weight: 600;
+            color: #3A4D39;
         }
-        .product-form button {
+        /* Styling for all form inputs and select element */
+        .product-form input[type="text"], 
+        .product-form input[type="number"], 
+        .product-form textarea, 
+        .product-form select {
             width: 100%;
-            padding: 10px;
-            background-color: #3A4D39;
-            color: white;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            margin-bottom: 15px; 
+        }
+        .product-form textarea {
+            resize: vertical;
+            min-height: 100px;
+            border-radius: 15px; 
+        }
+        /* Styling the "Add Item" button */
+        .product-form button {
+            background-color: #3A4D39; 
+            color: #ECE3CE;
+            padding: 15px 20px;
+            margin-top: 30px;
             border: none;
-            border-radius: 4px;
+            border-radius: 25px;
             cursor: pointer;
-            font-size: 1.1em;
+            font-size: 1.1rem;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .product-form button:hover {
+            background-color: #4F6F52; 
         }
         .modal-message {
             margin-top: 15px;
             font-weight: 600;
         }
+        
+        /* New styling for the status/welcome area */
+        #welcomeMessage {
+            color: #3A4D39;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        #sellerStatus {
+            font-size: 1rem;
+            margin-bottom: 30px;
+            color: orange;
+            font-weight: 500;
+        }
+
+        /* Styling for the new "Already a Seller? Log In" button (copied from style.css for local safety) */
+        .btn-seller-shortcut {
+            background-color: #b0b0b0 !important; 
+            color: white !important;
+            border: none !important;
+            padding: 12px !important;
+            margin-top: 10px !important;
+            font-size: 1rem !important;
+            width: 100%;
+            cursor: pointer;
+            border-radius: 25px;
+            margin-bottom: 5px !important; 
+        }
+        
+        .btn-seller-shortcut:hover {
+            background-color: #888888 !important;
+        }
     </style>
 </head>
 <body class="shop-body">
-
     <div class="dashboard-container">
+        <p id="welcomeMessage" style="color: #3A4D39;"></p>
+        <p id="sellerStatus" style="color: orange;"></p>
         <form id="productForm" class="product-form" enctype="multipart/form-data">
             <h2>Add New Item for Sale</h2>
             <label for="productName">Item Name</label>
@@ -76,7 +140,7 @@
             <button type="submit">Add Item</button>
         </form>
 
-        <p id="listingMsg" class="modal-message"></p>
+        <div id="listingMsg" class="modal-message"></div>
         <button onclick="logout()" style="background-color: #d9534f; margin-top: 20px;">Logout from Seller Account</button>
         <button onclick="window.location.href='shop-now.html'" style="background-color: #3A4D39; margin-top: 10px;">Go back to main page</button>
     </div>
@@ -92,13 +156,10 @@
             const welcomeMessage = safeGetElement('welcomeMessage');
             const sellerStatus = safeGetElement('sellerStatus');
             
-            // Issue #4 Fix: Prevent unwanted logout if token exists
             if (!token || !user || (user.role !== 'seller' && user.role !== 'admin')) {
-                // Only redirect if no session exists or role is wrong
                 alert('Access Denied. Please log in as a Seller.');
                 window.location.replace('shop-now.html'); 
             } else {
-                // ... (existing welcome logic)
                 welcomeMessage.textContent = `Welcome to your Seller Dashboard, ${user.name} (${user.email}).`;
                 if (user.status && user.status === 'pending') {
                     sellerStatus.textContent = "Your account status is currently 'pending review'. You can add products, but listings may not appear immediately.";
@@ -121,15 +182,13 @@
                         return;
                     }
                     
-                    // Build FormData object for multipart submission (including file)
                     const formData = new FormData();
                     formData.append('sellerId', sellerId);
                     formData.append('productName', document.getElementById('productName').value);
                     formData.append('description', document.getElementById('productDesc').value);
-                    // Pass price as string, validation happens on backend
                     formData.append('price', document.getElementById('productPrice').value); 
                     formData.append('category', category);
-                    // Append the file (Issue #7)
+
                     if (document.getElementById('productImage').files.length > 0) {
                         formData.append('productImage', document.getElementById('productImage').files[0]);
                     } else {
@@ -141,31 +200,26 @@
                     listingMsg.textContent = `Adding product...`;
                     listingMsg.style.color = 'orange';
 
-                    fetch('/api/product/add', { // Correct API endpoint
+                    fetch('/api/product/add', { 
                         method: 'POST',
-                        // Crucial: Do NOT set Content-Type header manually for FormData
                         headers: { 
-                            'Authorization': `Bearer ${token}` // Pass auth token
+                            'Authorization': `Bearer ${token}` 
                         },
-                        body: formData // FormData handles the multipart format
+                        body: formData 
                     })
                     .then(res => res.json())
                     .then(data => {
                         if (data.product) {
+                            // FIX 6: Show success message and reset form for immediate next listing
                             listingMsg.textContent = data.message;
                             listingMsg.style.color = '#3A4D39'; 
+                            
+                            // Reset form elements to allow adding the next item
                             productForm.reset();
                             
-                            // Near instant redirection after successful listing (Issue #1, #8)
-                            setTimeout(() => {
-                                // Redirect to the relevant category page
-                                window.location.href = `${category}.html`;
-                            }, 10); 
-
                         } else {
                             listingMsg.textContent = data.message || "Failed to list product.";
                             listingMsg.style.color = 'red';
-                            // Clear file input on error to allow re-selection
                             document.getElementById('productImage').value = '';
                         }
                     })
@@ -179,7 +233,6 @@
             }
         });
         
-        // This makes sure the logout is globally accessible and effective (Issue #4)
         window.logout = window.logout || (() => {
             localStorage.removeItem('token');
             localStorage.removeItem('user');

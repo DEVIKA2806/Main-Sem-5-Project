@@ -366,65 +366,78 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+  // ... inside saree.html ...
   <script src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const productContainer = document.getElementById('product-listing-container');
-            const loadingMessage = document.getElementById('loadingMessage');
+            const productGrid = document.getElementById('product-grid');
             
             async function fetchAndRenderProducts(category) {
-                if (productContainer) productContainer.innerHTML = ''; // Clear existing content
-                if (loadingMessage) loadingMessage.textContent = `Loading ${category} Collection...`;
+                if (!productGrid) return;
 
                 try {
-                    // Calls the new backend route (Issue #3, #8)
+                    // Calls the new backend route /api/product/:category
                     const response = await fetch(`/api/product/${category}`);
                     const data = await response.json();
 
-                    if (response.ok && data.products) {
-                        if (data.products.length > 0) {
-                            productContainer.innerHTML = ''; // Clear loading message
-                            data.products.forEach(product => {
-                                // Dynamically generates the product card HTML
-                                const productCard = `
-                                    <div class="col-lg-4 col-md-6 mb-4">
-                                        <div class="card h-100">
-                                            <img class="card-img-top" src="${product.imageUrl}" alt="${product.title}" style="height: 200px; object-fit: cover;">
-                                            <div class="card-body">
-                                                <h4 class="card-title">${product.title}</h4>
-                                                <h5>₹${product.price.toFixed(2)}</h5>
-                                                <p class="card-text">${product.description || 'No description provided.'}</p>
-                                            </div>
-                                            <div class="card-footer">
-                                                <a href="#" 
-                                                   class="btn-green" 
-                                                   data-product-id="${product._id}" 
-                                                   data-title="${product.title}" 
-                                                   data-price="${product.price}"
-                                                   data-image-url="${product.imageUrl}">
-                                                    Add to Cart
-                                                </a>
-                                            </div>
+                    if (response.ok && data.products && data.products.length > 0) {
+                        
+                        data.products.forEach(product => {
+                            // Dynamically generates the product card HTML
+                            const productCardHtml = `
+                                <div class="col">
+                                    <div class="card h-100">
+                                        <img src="/${product.imageUrl}" class="card-img-top" alt="${product.title}">
+                                        <div class="card-body">
+                                            <h5 class="card-title">${product.title} (New!)</h5>
+                                            <p class="card-text">${product.description || 'No description provided.'}</p>
+                                            <p class="fw-bold">₹${product.price.toFixed(2)}</p>
+                                            <button 
+                                                class="btn-green" 
+                                                data-product-id="${product._id}" 
+                                                data-title="${product.title}" 
+                                                data-price="${product.price}"
+                                                data-image-url="/${product.imageUrl.replace(/\\/g, '/')}"
+                                                onclick="addToCart(this.dataset.productId, this.dataset.title, this.dataset.price, this.dataset.imageUrl)"
+                                            >
+                                                Add to Cart
+                                            </button>
                                         </div>
                                     </div>
-                                `;
-                                productContainer.insertAdjacentHTML('beforeend', productCard); 
-                            });
-                        } else {
-                            productContainer.innerHTML = '<p>No items found in this collection yet.</p>';
-                        }
+                                </div>
+                            `;
+                            
+                            // Create a temporary element to hold the new dynamic card
+                            const tempDiv = document.createElement('div');
+                            tempDiv.innerHTML = productCardHtml.trim();
+                            const newProductCard = tempDiv.firstChild;
+
+                            // Randomly insert the new product card among the existing ones (Request 5)
+                            const existingCount = productGrid.children.length;
+                            const randomIndex = Math.floor(Math.random() * (existingCount + 1));
+
+                            if (existingCount > 0 && randomIndex < existingCount) {
+                                productGrid.insertBefore(newProductCard, productGrid.children[randomIndex]);
+                            } else {
+                                productGrid.appendChild(newProductCard);
+                            }
+                        });
+                    } else if (response.ok && data.products && data.products.length === 0) {
+                        console.log('No dynamic products found for this category.');
                     } else {
-                        productContainer.innerHTML = '<p style="color:red;">Failed to load products: ' + (data.message || 'Server error.') + '</p>';
+                        console.error('Failed to load dynamic products:', data.message || 'Server error.');
                     }
                 } catch (err) {
                     console.error('Network Error:', err);
-                    if (productContainer) productContainer.innerHTML = '<p style="color:red;">Network error. Could not reach product server.</p>';
                 }
             }
             
             // Set the category based on the current page file name
             const pageName = window.location.pathname.split('/').pop().split('.')[0];
-            fetchAndRenderProducts(pageName); 
+            // Only run the dynamic fetch for the relevant pages
+            if (['saree', 'artifacts', 'lifestyle'].includes(pageName)) {
+                fetchAndRenderProducts(pageName); 
+            }
         });
     </script>
 </body>
