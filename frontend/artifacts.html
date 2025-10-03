@@ -67,8 +67,15 @@
     <div id="sellerModal" class="login-modal">
         <div class="modal-card"></div>
     </div>
+    
+    <div id="checkoutModal" class="login-modal">
+        <div class="login-card">
+            <div id="checkoutForm"></div>
+        </div>
+    </div>
 
-  <div class="">
+
+  <div class="container-fluid mt-4"> 
     <div class="row">
       
       <aside class="col-md-3 p-3 bg-light rounded">
@@ -352,16 +359,16 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  // ... inside artifacts.html ...
   <script src="script.js"></script>
   <script>
+    const BACKEND_URL = '';
     document.addEventListener('DOMContentLoaded', () => {
       const productGrid = document.getElementById('product-grid');
       
       async function fetchAndRenderProducts(category) {
           if (!productGrid) return;
           try {
-              const response = await fetch(`/api/product/${category}`);
+              const response = await fetch(BACKEND_URL + `/api/product/${category}`);
               const data = await response.json();
 
               if (response.ok && data.products && data.products.length > 0) {
@@ -380,7 +387,6 @@
                                           data-title="${product.title}" 
                                           data-price="${product.price}"
                                           data-image-url="/${product.imageUrl.replace(/\\/g, '/')}"
-                                          onclick="addToCart(this.dataset.productId, this.dataset.title, this.dataset.price, this.dataset.imageUrl)"
                                       >
                                           Add to Cart
                                       </button>

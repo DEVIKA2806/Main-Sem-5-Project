@@ -1,0 +1,514 @@
+/* === GLOBAL STYLES === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body.shop-body {
+  background-color: #ebe8e2;
+  padding-top: 120px; /* to avoid overlap with fixed navbar */
+  color: #273826;
+}
+
+/* === NAVBAR === */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 95px;
+  width: 100%;
+  background-color: #4f6f52;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  padding: 0 30px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 0.1px 0.1px 50px rgba(0, 0, 0, 0.25);
+}
+
+.logo {
+  font-weight: 600;
+  font-size: 2rem;
+}
+.white {
+  color: #ece3ce;
+}
+.green {
+  color: #273826;
+  font-weight: 700;
+}
+
+.nav-items ul {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  gap: 1.5rem;
+}
+
+.nav-items a {
+  text-decoration: none;
+  font-size: 1.35rem;
+  color: #ece3ce;
+  font-weight: 500;
+}
+.nav-items a:hover {
+  color: #3a4d39;
+  text-decoration: underline;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+/* === Cart === */
+.cart {
+  position: relative;
+  font-size: 1.5rem;
+  color: #ece3ce;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.cart:hover {
+  color: #3a4d39;
+}
+#cart-count {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: #739072;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 2px 6px;
+}
+
+/* === Login button === */
+.login {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  border: none;
+  color: #ece3ce;
+  background-color: #3a4d39;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.login:hover {
+  background-color: #ece3ce;
+  color: #3a4d39;
+}
+
+/* === Search === */
+.shop-search {
+  font-size: 1.2rem;
+  color: #ece3ce;
+  cursor: pointer;
+}
+.shop-search:hover {
+  color: #273826;
+}
+
+/* === Seller Button === */
+.sell-btn button {
+  height: 40px;
+  width: 180px;
+  border-radius: 50px;
+  border: none;
+  background-color: #ece3ce;
+  color: #273826;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.sell-btn button:hover {
+  background-color: #3a4d39;
+  color: #ece3ce;
+  border: 2px solid #ece3ce;
+}
+
+/* === SHOP CONTENT (big category cards) === */
+.shop-content {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.body-items {
+  flex: 1 1 250px;  /* each card takes min 250px, grows evenly */
+  max-width: 280px; /* keeps consistent size */
+  text-align: center;
+}
+
+.body-items img {
+  height: 350px;
+  width: 280px;
+  border-radius: 20px;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+.body-items img:hover {
+  transform: scale(1.05);
+}
+.body-items h3 {
+  margin-top: 10px;
+  font-size: 1.3rem;
+  color: #273826;
+}
+.body-items a {
+  text-decoration: none;
+  color: inherit;
+}
+.body-items a:hover h3 {
+  text-decoration: underline;
+}
+
+/* === SHOP ITEMS (subcategory grids) === */
+.shop-items {
+  margin: 40px auto;
+  width: 90%;
+}
+
+.item-head {
+  font-size: 2rem;
+  margin: 5px 0 0;
+  color: #3a4d39;
+  text-align: center;
+}
+
+.shop-item {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.item {
+  background: #f5f5f5;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: center;
+  transition: 0.3s, box-shadow 0.3s;;
+  flex: 0 0 220px;
+  width: 220px;
+  border: none;
+  position: relative; 
+}
+
+.shop-item a {
+    text-decoration: none;
+    border: none;
+    outline: none;
+}
+
+.item img {
+  width: 100%;
+  height: 180px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+.item p {
+  margin-top: 10px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #273826;
+}
+.item:hover {
+  background: #ece3ce;
+  transform: translateY(-8px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Added a strong box-shadow */
+}
+
+/* === MODALS === */
+/* Login Modal Styles */
+.login-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(58, 77, 57, 0.8); /* semi-transparent background */
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.login-card {
+    background-color: #ECE3CE;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    width: 400px;
+    text-align: center;
+}
+
+.login-card h3 {
+    color: #3A4D39;
+    margin-bottom: 20px;
+}
+
+.login-card input {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    outline: none;
+    font-size: 1rem;
+}
+
+.login-card button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    background-color: #3A4D39;
+    color: #ECE3CE;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.login-card button:hover {
+    background-color: #4F6F52;
+}
+
+.login-card .close-btn {
+    background-color: transparent;
+    color: #3A4D39;
+    border: 1px solid #3A4D39;
+}
+
+.login-card .close-btn:hover {
+    background-color: #4F6F52;
+    color: #ECE3CE;
+    border: 1px solid #4F6F52;
+}
+
+.login-card .error {
+    color: red;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+/* footer */
+.site-footer {
+  background-color: #3A4D39; /* dark green background */
+  color: #ECE3CE; /* light cream text */
+  padding: 40px 20px 20px;
+  margin-top: 50px;
+}
+
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.footer-section h3 {
+  color: #ECE3CE;
+  margin-bottom: 15px;
+}
+
+.footer-section p, 
+.footer-section a {
+  color: #ECE3CE;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.footer-section a:hover {
+  color: #4F6F52; /* lighter green hover */
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 8px;
+}
+
+.footer-section ul li a {
+  color: #ECE3CE;
+}
+
+.footer-section ul li a:hover {
+  color: #4F6F52;
+}
+
+/* Newsletter Form */
+#newsletterForm {
+  display: flex;
+  flex-direction: column;
+}
+
+#newsletterForm input {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 25px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  outline: none;
+}
+
+#newsletterForm button {
+  background-color: #4F6F52;
+  color: #ECE3CE;
+  border: none;
+  border-radius: 25px;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: 0.3s ease;
+}
+
+#newsletterForm button:hover {
+  background-color: #ECE3CE;
+  color: #3A4D39;
+}
+
+#newsletterMsg {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #ECE3CE;
+}
+
+/* Social icons */
+.social-links a {
+  font-size: 1.5rem;
+  margin-right: 15px;
+  color: #ECE3CE;
+  transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+  color: #4F6F52;
+}
+
+/* Footer bottom */
+.footer-bottom {
+  border-top: 1px solid rgba(236, 227, 206, 0.3);
+  margin-top: 20px;
+  padding-top: 15px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Seller Modal Styles (adapted from Login Modal) */
+
+/* The main modal overlay */
+#sellerModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(58, 77, 57, 0.8); /* semi-transparent background */
+    display: none; /* Hidden by default, your JS will show it */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+/* The content card inside the modal */
+.modal-card {
+    background-color: #ECE3CE;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    width: 400px;
+    text-align: center;
+}
+
+/* Heading for the modal */
+.modal-card h2 {
+    color: #3A4D39;
+    margin-bottom: 20px;
+}
+
+/* Input fields */
+.modal-card input {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    outline: none;
+    font-size: 1rem;
+    box-sizing: border-box; /* Ensures padding doesn't increase total width */
+}
+
+/* Primary buttons (e.g., Register) */
+.modal-card button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    background-color: #3A4D39;
+    color: #ECE3CE;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover effect for primary buttons */
+.modal-card button:hover {
+    background-color: #4F6F52;
+}
+
+/* Style for the "Already a Seller? Log In" button */
+.modal-card .btn-seller-shortcut {
+    background-color: transparent;
+    color: #3A4D39;
+    /* Remove default button border for a cleaner link-style look, or add a subtle one */
+    border: 1px solid #ECE3CE; /* Subtle border matching background */
+    margin-bottom: 20px;
+    text-decoration: underline; /* Suggests it's a link/shortcut */
+}
+
+.modal-card .btn-seller-shortcut:hover {
+    background-color: #E2DCCF; /* Light hover background */
+    color: #4F6F52;
+    text-decoration: none;
+}
+
+/* Style for the close button */
+.modal-card .close-btn {
+    background-color: transparent;
+    color: #3A4D39;
+    border: 1px solid #3A4D39;
+    margin-top: 5px;
+}
+
+/* Hover effect for the close button */
+.modal-card .close-btn:hover {
+    background-color: #4F6F52;
+    color: #ECE3CE;
+    border: 1px solid #4F6F52;
+}
+
+/* Style for the message area (sellerMsg) */
+#sellerMsg {
+    color: #3A4D39; /* Use the main text color */
+    font-size: 0.9rem;
+    margin-top: 10px;
+}

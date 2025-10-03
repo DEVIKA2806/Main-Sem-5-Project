@@ -175,14 +175,15 @@
   background-color: #3A4D39;
 }
 
-/* FIX 1: Sidebar Filters improved layout and margin */
+/* Q1/Q3 FIX: Sidebar Filters adjusted margins to fix misalignment */
 aside {
   background-color: #f8f8f8 !important; 
   border: 1px solid #ddd;
   border-radius: 10px;
   padding: 20px;
   height: fit-content;
-  margin: 0 15px 20px 15px; 
+  /* FIX: Removed horizontal margins (0 15px 20px 15px) to keep the sidebar inside the column boundaries */
+  margin: 0 0 20px 0; 
 }
 
 aside h5 {
@@ -212,7 +213,7 @@ aside ul li {
 
 /* FIX 1: Product Cards layout context/alignment adjustments for the grid */
 main {
-    padding: 0 15px;
+    padding: 0; /* Removing padding to give max space for the grid */
 }
 
 main .card {
@@ -324,7 +325,7 @@ main .card:hover {
 }
 
 .login-card .error,
-.modal-message {
+.modal-card .error {
   color: red;
   font-size: 0.9rem;
   margin-bottom: 10px;

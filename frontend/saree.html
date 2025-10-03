@@ -67,6 +67,12 @@
     <div id="sellerModal" class="login-modal">
       <div class="modal-card"></div>
     </div>
+    
+    <div id="checkoutModal" class="login-modal">
+      <div class="login-card">
+          <div id="checkoutForm"></div>
+      </div>
+    </div>
 
   <div class="container-fluid mt-4">
     <div class="row">
@@ -199,8 +205,8 @@
               <div class="card-body">
                 <h5 class="card-title">Paithani</h5>
                 <p class="card-text">Exquisite silk Paithani featuring intricate, handwoven lotus motifs on the pallu.</p>
-                <p class="fw-bold">₹1,500</p>
-                <button class="btn-green" data-product-id="paithani2" data-title="Paithani Saree" data-price="1500" data-image-url="../assets/paithani2-img.jpg">Add to Cart</button>
+                <p class="fw-bold">₹8,200</p>
+                <button class="btn-green" data-product-id="paithani2" data-title="Paithani Saree" data-price="8200" data-image-url="../assets/paithani2-img.jpg">Add to Cart</button>
               </div>
             </div>
           </div>
@@ -366,9 +372,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  // ... inside saree.html ...
   <script src="script.js"></script>
     <script>
+        const BACKEND_URL = '';
         document.addEventListener('DOMContentLoaded', () => {
             const productGrid = document.getElementById('product-grid');
             
@@ -377,7 +383,7 @@
 
                 try {
                     // Calls the new backend route /api/product/:category
-                    const response = await fetch(`/api/product/${category}`);
+                    const response = await fetch(BACKEND_URL + `/api/product/${category}`);
                     const data = await response.json();
 
                     if (response.ok && data.products && data.products.length > 0) {
@@ -398,7 +404,6 @@
                                                 data-title="${product.title}" 
                                                 data-price="${product.price}"
                                                 data-image-url="/${product.imageUrl.replace(/\\/g, '/')}"
-                                                onclick="addToCart(this.dataset.productId, this.dataset.title, this.dataset.price, this.dataset.imageUrl)"
                                             >
                                                 Add to Cart
                                             </button>

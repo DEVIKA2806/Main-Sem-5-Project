@@ -7,6 +7,8 @@ const BACKEND_URL = '';
 // 1. GLOBAL STATE AND CART FUNCTIONS
 // *****************************************************************
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
+const deliveryDetailsKey = 'userDeliveryDetails';
+let deliveryDetails = JSON.parse(localStorage.getItem(deliveryDetailsKey)) || {};
 
 function updateCartCount() {
     const countElement = safeGetElement('cart-count');
@@ -146,17 +148,19 @@ function closeLogin() {
 }
 
 function logout() {
-    // Clears all session state (Issue #4 fix)
+    // Clears all session state (Q1 & Q7 Fix)
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('currentSellerId'); // Crucial for seller logout persistence
     cart = []; 
     localStorage.removeItem('cart');
+    // NOTE: Delivery details are intentionally kept to re-fill for the customer's next visit (Q6)
     updateCartCount();
     closeLogin();
     
     setTimeout(() => {
-        window.location.href = 'shop-now.html';
+        // Reloads the current page, fulfilling the requirement to stay on the same page.
+        window.location.reload(); 
     }, 100);
 }
 
@@ -474,6 +478,166 @@ function closeSeller() {
 }
 
 
+// --- CHECKOUT FUNCTIONALITY (Q5 & Q6) ---
+
+function closeCheckoutModal() {
+    const checkoutModal = safeGetElement('checkoutModal');
+    if (checkoutModal) checkoutModal.style.display = 'none';
+    const checkoutMsg = safeGetElement('checkoutMsg');
+    if (checkoutMsg) checkoutMsg.textContent = '';
+}
+
+function openCheckoutModal() {
+    if (cart.length === 0) {
+        alert('Your cart is empty.');
+        return;
+    }
+    const user = getLoggedInUser();
+    if (!user) {
+        alert('You must be logged in to proceed to checkout.');
+        openLogin();
+        return;
+    }
+
+    const checkoutModal = safeGetElement('checkoutModal');
+    const checkoutForm = safeGetElement('checkoutForm');
+    if (!checkoutModal || !checkoutForm) return;
+
+    // Load saved details or fall back to user name if available (Q6)
+    const name = deliveryDetails.name || user.name || '';
+    const contact = deliveryDetails.contact || '';
+    const address = deliveryDetails.address || '';
+    const pincode = deliveryDetails.pincode || '';
+
+    checkoutForm.innerHTML = `
+        <h2 class="text-center">Checkout Details</h2>
+        <div id="checkoutError" class="error"></div>
+        <input type="text" id="deliveryName" placeholder="Full Name" value="${name}" required>
+        <input type="tel" id="deliveryContact" placeholder="Indian Contact No. (10 digits)" value="${contact}" maxlength="10" pattern="\\d{10}" title="Contact number must be 10 digits" required>
+        <input type="text" id="deliveryAddress" placeholder="Full Address" value="${address}" required>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <input type="text" id="deliveryPincode" placeholder="Pincode (e.g. 400001)" value="${pincode}" maxlength="6" pattern="\\d{6}" title="Pincode must be 6 digits" style="margin-bottom: 0;" required>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="validatePincode()" style="width: 150px; flex-shrink: 0; margin-bottom: 0;">Verify Pincode</button>
+        </div>
+        <div id="pincodeStatus" style="font-size: 0.9em; margin-bottom: 15px;"></div>
+        
+        <h4 style="margin-top: 20px;">Payment Options</h4>
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+            <button type="button" class="btn-green" onclick="handleCheckout('COD')">
+                Cash on Delivery (COD)
+            </button>
+            <button type="button" class="btn btn-green-outline" disabled>
+                Online Payment (Coming Soon)
+            </button>
+        </div>
+
+        <button type="button" class="close-btn" onclick="closeCheckoutModal()">Cancel</button>
+    `;
+    
+    // Re-check pincode if it's already filled (Q6)
+    if(pincode) {
+        validatePincode(pincode);
+    }
+    
+    checkoutModal.style.display = 'flex';
+}
+
+function validatePincode(pincodeValue = null) {
+    const pincodeInput = safeGetElement('deliveryPincode');
+    const pincodeStatus = safeGetElement('pincodeStatus');
+    const pincode = pincodeValue || pincodeInput?.value.trim();
+
+    if (!pincodeInput || !pincodeStatus) return;
+
+    // Indian Pincode regex (6 digits)
+    const pincodePattern = /^\d{6}$/;
+
+    if (!pincode.match(pincodePattern)) {
+        pincodeStatus.style.color = 'red';
+        pincodeStatus.textContent = 'Invalid Pincode format (must be 6 digits).';
+        return false;
+    }
+
+    // Simulate Pincode verification (Mock logic for Indian Pincodes)
+    pincodeStatus.style.color = 'orange';
+    pincodeStatus.textContent = `Verifying Pincode ${pincode}...`;
+
+    setTimeout(() => {
+        // Mock API call simulation
+        if (pincode === '400001' || pincode === '110001' || pincode.startsWith('4') || pincode.startsWith('1')) {
+            pincodeStatus.style.color = 'green';
+            pincodeStatus.textContent = `Pincode ${pincode} verified! Delivery available in 5-7 days.`;
+        } else {
+            pincodeStatus.style.color = 'red';
+            pincodeStatus.textContent = `Pincode ${pincode} not serviceable currently.`;
+        }
+    }, 500);
+}
+
+function handleCheckout(paymentMethod) {
+    const name = safeGetElement('deliveryName')?.value.trim();
+    const contact = safeGetElement('deliveryContact')?.value.trim();
+    const address = safeGetElement('deliveryAddress')?.value.trim();
+    const pincode = safeGetElement('deliveryPincode')?.value.trim();
+    const errorMsg = safeGetElement('checkoutError');
+    const pincodeStatus = safeGetElement('pincodeStatus');
+
+    if (!name || !contact || !address || !pincode) {
+        errorMsg.style.color = 'red';
+        errorMsg.textContent = 'All delivery fields are required.';
+        return;
+    }
+    
+    if (!contact.match(/^\d{10}$/)) {
+        errorMsg.style.color = 'red';
+        errorMsg.textContent = 'Contact number must be 10 digits.';
+        return;
+    }
+
+    if (pincodeStatus.textContent.includes('not serviceable')) {
+        errorMsg.style.color = 'red';
+        errorMsg.textContent = 'Delivery is not available for this pincode. Please enter a serviceable pincode and verify.';
+        return;
+    }
+
+    errorMsg.style.color = 'orange';
+    errorMsg.textContent = `Processing order via ${paymentMethod}...`;
+
+    // Save/Update Delivery Details (Q6)
+    deliveryDetails = { name, contact, address, pincode };
+    localStorage.setItem(deliveryDetailsKey, JSON.stringify(deliveryDetails));
+
+    // Prepare order data (simulated for demonstration)
+    const orderItems = cart.map(item => ({
+        id: item.productId,
+        name: item.title,
+        qty: item.qty,
+        price: item.price
+    }));
+    
+    const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+    const orderData = {
+        items: orderItems,
+        total: parseFloat(total.toFixed(2)),
+        address: `${address}, Pincode: ${pincode}`,
+        customerName: name,
+        customerContact: contact,
+        paymentMethod: paymentMethod
+    };
+    
+    // --- Mock Success Simulation ---
+    setTimeout(() => {
+        // Clear cart upon successful order
+        cart = [];
+        localStorage.removeItem('cart');
+        closeCheckoutModal();
+        alert(`Order placed successfully via ${paymentMethod}! Total: ₹${orderData.total.toFixed(2)}. Your items will be delivered soon!`);
+        window.location.href = 'index.html'; // Redirect to home after purchase
+    }, 1000);
+}
+
+
 // --- RE-SELL (Coming Soon) ---
 
 function openResell() {
@@ -744,15 +908,19 @@ document.querySelectorAll('a[href^="#about-section"]').forEach(anchor => {
     });
 });
 
-// Ensures the global logout function is available to the HTML buttons
+// Ensures the global logout function is available to the HTML buttons (Q1 & Q7 Fix)
 window.logout = window.logout || (() => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('currentSellerId');
-    window.location.href = 'shop-now.html';
+    window.location.reload(); 
 });
 
-
+// Export checkout functions to global scope for HTML access (Q5 & Q6)
+window.openCheckoutModal = openCheckoutModal;
+window.closeCheckoutModal = closeCheckoutModal;
+window.handleCheckout = handleCheckout;
+window.validatePincode = validatePincode;
 
 
 // frontend/artifacts.js

@@ -139,10 +139,16 @@
             <div class="total-section">
                 <span>Subtotal:</span> <span id="cartSubtotal">₹0.00</span>
             </div>
-            <button class="btn-checkout" onclick="alert('Proceeding to checkout is a future feature!')">Proceed to Checkout</button>
+            <button class="btn-checkout" onclick="openCheckoutModal()">Proceed to Checkout</button>
         </div>
     </div>
-
+    
+    <div id="checkoutModal" class="login-modal">
+        <div class="login-card">
+            <div id="checkoutForm">
+                </div>
+        </div>
+    </div>
     <script src="script.js"></script>
     <script>
         // Directly call the render function for the cart page on load
