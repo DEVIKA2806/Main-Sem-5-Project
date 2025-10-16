@@ -210,12 +210,11 @@
                     .then(res => res.json())
                     .then(data => {
                         if (data.product) {
-                            // FIX 6: Show success message and reset form for immediate next listing
-                            listingMsg.textContent = data.message;
-                            listingMsg.style.color = '#3A4D39'; 
-                            
-                            // Reset form elements to allow adding the next item
-                            productForm.reset();
+                            // FIX: Redirect and force the browser to reload from the server (not cache)
+                            const categoryFile = data.product.category + '.html'; 
+                            // Append a timestamp or cache-busting query parameter
+                            const redirectUrl = categoryFile + '?_=' + new Date().getTime();
+                            window.location.href = redirectUrl; 
                             
                         } else {
                             listingMsg.textContent = data.message || "Failed to list product.";

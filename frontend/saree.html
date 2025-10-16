@@ -384,8 +384,12 @@
                 if (!productGrid) return;
 
                 try {
+                    // FIX: Append a cache-busting timestamp to the API call URL
+                    const cacheBuster = new Date().getTime();
+                    const fetchUrl = BACKEND_URL + `/api/product/${category}?t=${cacheBuster}`; 
+
                     // Calls the new backend route /api/product/:category
-                    const response = await fetch(BACKEND_URL + `/api/product/${category}`);
+                    const response = await fetch(fetchUrl);
                     const data = await response.json();
 
                     if (response.ok && data.products && data.products.length > 0) {
@@ -395,7 +399,7 @@
                             const productCardHtml = `
                                 <div class="col">
                                     <div class="card h-100">
-                                        <img src="/${product.imageUrl}" class="card-img-top" alt="${product.title}">
+                                        <img src="${product.imageUrl}" class="card-img-top" alt="${product.title}">
                                         <div class="card-body">
                                             <h5 class="card-title">${product.title} (New!)</h5>
                                             <p class="card-text">${product.description || 'No description provided.'}</p>
@@ -405,7 +409,7 @@
                                                 data-product-id="${product._id}" 
                                                 data-title="${product.title}" 
                                                 data-price="${product.price}"
-                                                data-image-url="/${product.imageUrl.replace(/\\/g, '/')}"
+                                                data-image-url="${product.imageUrl.replace(/\\/g, '/')}"
                                             >
                                                 Add to Cart
                                             </button>

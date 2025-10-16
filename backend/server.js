@@ -82,18 +82,21 @@ io.on('connection', (socket) => {
     // Handle WebRTC offer
     socket.on('webrtc-offer', ({ offer, roomId }) => {
         console.log(`Broadcasting offer from ${socket.id} in room ${roomId}`);
+        // Send to all others in the room
         socket.to(roomId).emit('webrtc-offer', { offer, fromId: socket.id });
     });
 
     // Handle WebRTC answer
     socket.on('webrtc-answer', ({ answer, roomId }) => {
         console.log(`Broadcasting answer from ${socket.id} in room ${roomId}`);
+        // Send to all others in the room
         socket.to(roomId).emit('webrtc-answer', { answer, fromId: socket.id });
     });
 
     // Handle ICE candidates
     socket.on('webrtc-ice-candidate', ({ candidate, roomId }) => {
         console.log(`Broadcasting ICE candidate from ${socket.id} in room ${roomId}`);
+        // Send to all others in the room
         socket.to(roomId).emit('webrtc-ice-candidate', { candidate, fromId: socket.id });
     });
 

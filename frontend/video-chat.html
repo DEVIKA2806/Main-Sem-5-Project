@@ -4,16 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hand2Heart - Video Chat</title>
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="saree.css">
 
@@ -108,7 +104,7 @@
             </div>
             <div class="video-player">
                 <video id="remoteVideo" autoplay playsinline></video>
-                <p>Seller's Video</p>
+                <p>Seller's/Peer's Video</p>
             </div>
         </div>
 
@@ -118,6 +114,14 @@
             <button id="createBtn" class="btn btn-primary" disabled>Create Room</button>
             <button id="joinBtn" class="btn btn-info" disabled>Join Room</button>
             <button id="hangupBtn" class="btn btn-danger" disabled>Hang Up</button>
+            
+            <div id="room-link-container" class="mt-2" style="display: none;">
+                <strong>Share this Room Link with your customer:</strong>
+                <div class="input-group">
+                    <input type="text" id="roomLink" class="form-control" readonly>
+                    <button class="btn btn-secondary" onclick="copyRoomLink()">Copy</button>
+                </div>
+            </div>
         </div>
 
         <div id="signaling-status" class="alert alert-info" role="alert">
@@ -126,13 +130,6 @@
                 To connect, start your camera. If you are starting the call, click "Create Room" and share the page link. 
                 If you received a link, click "Join Room".
             </p>
-            <div id="room-link-container" class="mt-2" style="display: none;">
-                <strong>Share this Room Link with your customer:</strong>
-                <div class="input-group">
-                    <input type="text" id="roomLink" class="form-control" readonly>
-                    <button class="btn btn-secondary" onclick="copyRoomLink()">Copy</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -146,14 +143,6 @@
             
             <button class="sign-in-btn" onclick="window.location.href='register.html'; closeLogin()">Sign Up</button>
             <button class="close-btn" onclick="closeLogin()">Close</button>
-        </div>
-    </div>
-
-    <div id="room-link-container" class="mt-2" style="display: none;">
-        <strong>Share this Room Link with your customer:</strong>
-        <div class="input-group">
-            <input type="text" id="roomLink" class="form-control" readonly>
-            <button class="btn btn-secondary" onclick="copyRoomLink()">Copy</button>
         </div>
     </div>
 
@@ -181,6 +170,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
     <script>
         // DOM Elements
@@ -200,10 +190,9 @@
         let peerConnection;
         let currentRoom; 
         let isCaller = false;
-        // This would connect to your backend signaling server.
-        // const socket = io();
+        
+        const socket = io(); 
 
-        // STUN servers configuration
         const configuration = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
@@ -222,7 +211,6 @@
 
         function updateStatus(message) {
             console.log(message);
-            // Preserve the descriptive paragraph in the status div structure
             const existingParagraph = statusDiv.querySelector('p');
             statusDiv.innerHTML = `<strong>Status:</strong> ${message}`;
             if (existingParagraph) {
@@ -230,52 +218,170 @@
             }
         }
 
-        // --- Page Load Logic: Enforce Role Restrictions ---
-        document.addEventListener('DOMContentLoaded', () => {
+        function endCallCleanup() {
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            localVideo.srcObject = null;
+            remoteVideo.srcObject = null;
+            
+            startBtn.disabled = false;
+            joinBtn.disabled = true;
+            createBtn.disabled = true;
+            hangupBtn.disabled = true;
+            
+            window.history.pushState({}, document.title, window.location.pathname);
+            roomLinkContainer.style.display = 'none';
+            
+            updateStatus("Call ended. Ready to start a new one.");
+            window.location.reload(); 
+        }
+        
+        // --- Socket.IO Event Handlers (Unchanged from last successful signaling logic) ---
+        socket.on('connect', () => {
+            console.log('Connected to signaling server:', socket.id);
+            initializeUI(); 
+        });
+
+        socket.on('peer-joined', async ({ peerId }) => {
+            updateStatus(`A peer (${peerId}) joined room **${currentRoom}**!`);
+            
+            if (isCaller && peerConnection) {
+                updateStatus(`Peer (${peerId}) joined. Creating offer...`);
+                try {
+                    const offer = await peerConnection.createOffer();
+                    await peerConnection.setLocalDescription(offer);
+                    socket.emit('webrtc-offer', { offer, roomId: currentRoom });
+                    updateStatus('Offer sent to peer. Waiting for answer...');
+                } catch (e) {
+                    console.error('Error creating or sending offer:', e);
+                    updateStatus('Error creating or sending offer. Ending call.');
+                    endCallCleanup();
+                }
+            }
+        });
+
+        socket.on('webrtc-offer', async ({ offer, fromId }) => {
+            if (!isCaller && !peerConnection) {
+                startCall();
+            }
+            
+            if (!isCaller && peerConnection) {
+                updateStatus(`Received offer from ${fromId}. Setting remote description...`);
+                try {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                    
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    
+                    socket.emit('webrtc-answer', { answer, roomId: currentRoom });
+                    updateStatus('Sent answer to seller. Waiting for ICE candidates...');
+                } catch (e) {
+                    console.error('Error handling offer:', e);
+                    updateStatus('Error processing offer. Ending call.');
+                    endCallCleanup();
+                }
+            }
+        });
+
+        socket.on('webrtc-answer', async ({ answer, fromId }) => {
+            if (isCaller && peerConnection) {
+                updateStatus(`Received answer from ${fromId}. Setting remote description...`);
+                try {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                } catch (e) {
+                    console.error('Error handling answer:', e);
+                    updateStatus('Error processing answer. Ending call.');
+                    endCallCleanup();
+                }
+            }
+        });
+
+        socket.on('webrtc-ice-candidate', async ({ candidate, fromId }) => {
+            try {
+                if (candidate && peerConnection) {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                    console.log(`Added ICE candidate from ${fromId}.`);
+                }
+            } catch (e) {
+                console.error('Error adding received ICE candidate:', e);
+            }
+        });
+        
+        // --- Core UI Logic ---
+        function initializeUI() {
             const user = getLoggedInUser();
             const urlParams = new URLSearchParams(window.location.search);
             const roomIdFromUrl = urlParams.get('room');
+            
+            startBtn.disabled = false;
+            createBtn.disabled = true;
+            joinBtn.disabled = true;
+            hangupBtn.disabled = true;
+            roomLinkContainer.style.display = 'none';
 
-            // --- Access Check ---
             if (!user) {
                 updateStatus('You must be logged in to use video chat. Please <a href="register.html">register or log in</a> to continue.');
                 startBtn.disabled = true;
                 createBtn.style.display = 'none';
                 joinBtn.style.display = 'none';
-                roomLinkContainer.style.display = 'none';
                 return;
             }
+            
+            if (!socket.connected) {
+                 updateStatus('Connecting to signaling server...');
+                 startBtn.disabled = true;
+                 return;
+            }
 
-            // --- Role-Based Button Setup ---
             if (user.role === 'seller') {
-                // Seller: Can only CREATE rooms. Hide Join button.
-                joinBtn.style.display = 'none';
-                updateStatus(`Welcome, **Seller**! Start your camera to create a new room.`);
+                joinBtn.style.display = 'none'; 
+                isCaller = true;
 
                 if (roomIdFromUrl) {
                     currentRoom = roomIdFromUrl;
-                    // Pre-populate the shared link if the seller refreshed the page
-                    roomLinkInput.value = window.location.href;
+                    
+                    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?room=' + currentRoom;
+                    roomLinkInput.value = newUrl;
                     roomLinkContainer.style.display = 'block';
-                    updateStatus(`Room **${currentRoom}** ready. Share the link or start camera.`);
+                    roomLinkInput.readOnly = true;
+                    roomLinkContainer.querySelector('strong').textContent = "Share this Room Link with your customer (proper link):";
+                    roomLinkContainer.querySelector('button').textContent = "Copy";
+                    roomLinkContainer.querySelector('button').onclick = copyRoomLink;
+                    roomLinkContainer.querySelector('button').style.display = 'inline-block';
+                    
+                    updateStatus(`Room **${currentRoom}** ready. Start your camera and connect.`);
+                    createBtn.disabled = true;
+                    
+                } else {
+                    createBtn.disabled = false;
+                    createBtn.style.display = 'block';
+                    updateStatus(`Welcome, **Seller**! Start your camera and click **'Create Room'**.`);
                 }
 
             } else if (user.role === 'user') {
-                // Customer: Can only JOIN rooms. Hide Create button.
-                createBtn.style.display = 'none';
+                createBtn.style.display = 'none'; 
+                isCaller = false;
 
                 if (roomIdFromUrl) {
-                    // Customer with Room ID in URL
                     currentRoom = roomIdFromUrl;
                     updateStatus(`Welcome, **Customer**! Room link found. Start your camera to join room '${currentRoom}'.`);
-                    // Use the same container to display the join link info
+                    
+                    // Setup the view for the joining user
                     roomLinkInput.value = window.location.href; 
                     roomLinkInput.readOnly = true;
                     roomLinkContainer.style.display = 'block';
-                    roomLinkContainer.querySelector('strong').textContent = "Room Link Found:";
-                    roomLinkContainer.querySelector('button').style.display = 'none'; // Hide copy button
+                    roomLinkContainer.querySelector('strong').textContent = "Joining Room:";
+                    roomLinkContainer.querySelector('button').style.display = 'none';
+                    
+                    joinBtn.disabled = true;
+                    startBtn.disabled = false;
                 } else {
-                    // Customer without Room ID: Show a panel to paste the URL
+                    // This is the customer's paste-to-join interface
                     roomLinkContainer.querySelector('strong').textContent = "Paste the Room Link from the seller below:";
                     roomLinkInput.value = '';
                     roomLinkInput.readOnly = false;
@@ -286,7 +392,7 @@
                     roomLinkContainer.style.display = 'block';
 
                     updateStatus(`Welcome, **Customer**! Paste your seller's link to start.`);
-                    joinBtn.style.display = 'none'; // Hide join button until room ID is set
+                    joinBtn.style.display = 'none'; 
                     startBtn.disabled = true; 
                 }
             } else {
@@ -296,19 +402,22 @@
                 joinBtn.style.display = 'none';
                 roomLinkContainer.style.display = 'none';
             }
-        });
+        }
         
-        // --- New Function for Customer to paste and go to room ---
         function goToRoomFromPaste() {
             const pastedUrl = roomLinkInput.value.trim();
-            const urlParams = new URLSearchParams(new URL(pastedUrl).search);
-            const roomId = urlParams.get('room');
+            try {
+                const urlObj = new URL(pastedUrl);
+                const urlParams = new URLSearchParams(urlObj.search);
+                const roomId = urlParams.get('room');
 
-            if (roomId) {
-                // Redirect the customer to the correct URL format to enable the joining flow
-                window.location.href = window.location.pathname + `?room=${roomId}`;
-            } else {
-                alert("Invalid room link. Please ensure it contains a '?room=xxxx' parameter.");
+                if (roomId) {
+                    window.location.href = window.location.pathname + `?room=${roomId}`;
+                } else {
+                    alert("Invalid room link. Please ensure it contains a '?room=xxxx' parameter.");
+                }
+            } catch (e) {
+                 alert("Invalid URL format pasted.");
             }
         }
 
@@ -316,38 +425,50 @@
         // --- 1. Start Camera ---
         // -----------------------------------------------------
         startBtn.onclick = async () => {
+            const user = getLoggedInUser();
+            if (!user) return;
+            
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                const user = getLoggedInUser();
 
                 startBtn.disabled = true;
                 hangupBtn.disabled = false;
                 
+                localVideo.srcObject = null; 
+                remoteVideo.srcObject = null; 
+
                 if (user.role === 'seller') {
-                    // Seller sees their video in the remote window (Seller's Video)
+                    // SELLER: Local video goes to the RIGHT/PEER panel
                     remoteVideo.srcObject = localStream;
-                    localVideo.srcObject = null; // Clear local view, since the seller wants to show the customer's feed here eventually
+                    updateStatus(`Camera started. **Your video is now in the Seller/Peer view.** Click 'Create Room' or 'Join Room'.`);
+
+                    if (currentRoom) {
+                        startCall();
+                        socket.emit('join-room', currentRoom);
+                        createBtn.disabled = true;
+                    } else {
+                        createBtn.disabled = false;
+                    }
                     
-                    createBtn.disabled = false;
-                    updateStatus("Camera started. Click **'Create Room'** to get your shareable link.");
                 } else if (user.role === 'user' && currentRoom) {
-                    // Customer sees their video in the local window (Your Video)
+                    // CUSTOMER: Local video goes to the LEFT/YOUR panel
                     localVideo.srcObject = localStream;
-                    
+                    updateStatus(`Camera started. **Your video is now in the Your Video view.** Click 'Join Room'.`);
+
                     joinBtn.disabled = false;
-                    updateStatus(`Camera started. Click **'Join Room'** to connect to ${currentRoom}.`);
-                } else {
-                    // Fallback for user error
+                } else if (user.role === 'user' && !currentRoom) {
                     localStream.getTracks().forEach(track => track.stop());
-                    updateStatus("Error: Cannot start call. Missing room details or invalid role state.");
-                    startBtn.disabled = false;
+                    localVideo.srcObject = null;
+                    updateStatus("Error: Cannot start call. Paste a room link first.");
+                    startBtn.disabled = true;
                     hangupBtn.disabled = true;
                 }
-
 
             } catch (error) {
                 console.error('Error accessing media devices.', error);
                 alert('Could not access your camera or microphone. Please check permissions.');
+                startBtn.disabled = false;
+                hangupBtn.disabled = true;
             }
         };
 
@@ -356,30 +477,27 @@
         // -----------------------------------------------------
         createBtn.onclick = () => {
             const user = getLoggedInUser();
-            if (user?.role !== 'seller') {
-                updateStatus("Error: Only sellers can create rooms.");
+            if (user?.role !== 'seller' || !localStream) {
+                updateStatus("Error: Only sellers with an active camera can create rooms.");
                 return;
             }
 
             isCaller = true;
             createBtn.disabled = true;
 
-            // Generate a random room ID
             const newRoomId = 'room-' + Math.random().toString(36).substr(2, 9);
             currentRoom = newRoomId;
 
-            // Update the URL without reloading the page
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?room=' + newRoomId;
-            window.history.pushState({path: newUrl}, '', newUrl);
+            window.history.pushState({path: newUrl}, '', newUrl); 
 
-            // Display the link for the seller to copy
             roomLinkInput.value = newUrl;
             roomLinkContainer.style.display = 'block';
 
-            updateStatus(`Room **${currentRoom}** created! Share the link and wait for the customer to join...`);
+            updateStatus(`Room **${currentRoom}** created! Share the proper link and wait for the customer to join...`);
             
-            // In a real app, you'd send a signal to the server to create the room
-            // socket.emit('create-room', currentRoom);
+            startCall(); 
+            socket.emit('join-room', currentRoom);
         };
 
         function copyRoomLink() {
@@ -393,92 +511,78 @@
         // -----------------------------------------------------
         joinBtn.onclick = () => {
             const user = getLoggedInUser();
-            if (user?.role !== 'user' || !currentRoom) {
-                updateStatus("Error: Only customers with a valid room link can join.");
+            if (user?.role !== 'user' || !currentRoom || !localStream) {
+                updateStatus("Error: Only customers with a valid room link and active camera can join.");
                 return;
             }
 
             isCaller = false;
             joinBtn.disabled = true;
+            startBtn.disabled = true;
 
-            if (currentRoom) {
-                updateStatus(`Joining room **${currentRoom}**. Creating connection...`);
-                // In a real app, you'd send a signal to the server to join the room
-                // socket.emit('join-room', currentRoom);
-                startCall(); 
-            }
+            updateStatus(`Joining room **${currentRoom}**. Creating connection...`);
+            
+            startCall(); 
+            socket.emit('join-room', currentRoom);
         };
 
         // -----------------------------------------------------
-        // --- 3. Start the WebRTC Call process (Mockup) ---
+        // --- 3. Start the WebRTC Call process ---
         // -----------------------------------------------------
-        async function startCall() {
-            updateStatus("Initializing WebRTC connection...");
+        function startCall() {
+            if (peerConnection) {
+                return;
+            }
+
             peerConnection = new RTCPeerConnection(configuration);
             
-            // Determine which stream to add and which video element to listen on
-            let streamToAdd = localStream;
-            let videoToReceive = isCaller ? localVideo : remoteVideo;
-            
-            // Add local stream to the peer connection
-            streamToAdd.getTracks().forEach(track => {
-                peerConnection.addTrack(track, streamToAdd);
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
             });
 
-            // Listen for remote stream and display it
+            // Listen for remote tracks and display them
             peerConnection.ontrack = event => {
-                if (!videoToReceive.srcObject) {
-                    updateStatus("Remote stream received. Connecting...");
-                    videoToReceive.srcObject = event.streams[0];
+                const user = getLoggedInUser();
+                
+                let targetVideoElement;
+                if (user.role === 'seller') {
+                    // SELLER sees the PEER/CUSTOMER video on the LEFT/YOUR panel.
+                    targetVideoElement = localVideo;
+                } else {
+                    // CUSTOMER sees the PEER/SELLER video on the RIGHT/PEER panel.
+                    targetVideoElement = remoteVideo;
+                }
+                
+                if (!targetVideoElement.srcObject) {
+                    targetVideoElement.srcObject = event.streams[0];
+                    updateStatus("Remote stream received. Connection established!");
                 }
             };
-
-            if (isCaller) { // The creator (Seller)
-                updateStatus("Waiting for remote offer...");
-                // Seller's video is already set to remoteVideo (as per new logic)
-            } else { // The joiner (Customer)
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                updateStatus("Offer created. Sending to seller...");
-                // In a real app, you'd send this offer via the signaling server
-                // socket.emit('webrtc-offer', { offer, room: currentRoom });
-            }
+            
+            // Handle ICE candidates
+            peerConnection.onicecandidate = event => {
+                if (event.candidate) {
+                    socket.emit('webrtc-ice-candidate', { 
+                        candidate: event.candidate, 
+                        roomId: currentRoom 
+                    });
+                }
+            };
         }
-
-        // Mock functions to replace signaling server logic:
-        /* async function handleOffer(offer) { ... }
-        async function handleAnswer(answer) { ... } 
-        */
-        // -----------------------------------------------------
 
         // -----------------------------------------------------
         // --- 4. Hang Up ---
         // -----------------------------------------------------
-        hangupBtn.onclick = () => {
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-            }
-            localVideo.srcObject = null;
-            remoteVideo.srcObject = null;
-            
-            // Reset buttons to initial state
-            startBtn.disabled = false;
-            joinBtn.disabled = true;
-            createBtn.disabled = true;
-            hangupBtn.disabled = true;
-            
-            // Clear the room from URL
-            window.history.pushState({}, document.title, window.location.pathname);
-            roomLinkContainer.style.display = 'none';
-            
-            updateStatus("Call ended. Ready to start a new one.");
-            // Reload page to reset all UI elements correctly based on DOMContentLoaded logic
-            window.location.reload(); 
-        };
+        hangupBtn.onclick = endCallCleanup;
+        
+        document.addEventListener('DOMContentLoaded', initializeUI);
+        
+        window.logout = window.logout || (() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('currentSellerId');
+            window.location.href = 'shop-now.html';
+        }); 
     </script>
 </body>
 </html>
