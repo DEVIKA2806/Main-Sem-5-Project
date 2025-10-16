@@ -88,7 +88,7 @@ router.post('/add', auth, (req, res, next) => {
                 description: description,
                 price: numericPrice,
                 category: category,
-                // Store the relative URL for frontend use (Issue #7)
+                // Store the relative URL for frontend use (This path is correct)
                 imageUrl: '/assets/products/' + req.file.filename, 
             });
 
