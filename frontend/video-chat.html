@@ -20,7 +20,7 @@
     <style>
         .video-chat-container {
             max-width: 1200px;
-            margin: 40px auto;
+            margin: 150px auto;
             padding: 20px;
             background-color: #ECE3CE;
             border-radius: 15px;
@@ -133,6 +133,19 @@
                     <button class="btn btn-secondary" onclick="copyRoomLink()">Copy</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="loginModal" class="login-modal">
+        <div class="login-card">
+            <h3>Login</h3>
+            <input type="email" id="modalUsername" placeholder="Email" />
+            <input type="password" id="modalPassword" placeholder="Password" />
+            <div id="modalError" class="error"></div>
+            <button onclick="validateModalLogin()">Login</button>
+            
+            <button class="sign-in-btn" onclick="window.location.href='register.html'; closeLogin()">Sign Up</button>
+            <button class="close-btn" onclick="closeLogin()">Close</button>
         </div>
     </div>
 

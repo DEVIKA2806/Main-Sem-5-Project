@@ -164,8 +164,8 @@ body {
 
 
 /* content-part */
-.hero_section, .main-content {
-    margin-top: 100px;
+.main-content {
+    margin-top: 200px;
 }
 
 /* Q2 FIX: Ensure horizontal alignment for the main category links */
