@@ -253,7 +253,7 @@
               <img src="../assets/paithani3-img.jpg" class="card-img-top" alt="Saree">
               <div class="card-body">
                 <h5 class="card-title">Paithani</h5>
-                <p class="card-text">A magnificent silk Paithani, elevated with intricate brocade work for a rich, textured finish.</p>
+                <p class="card-text">Elegant silk paithani</p>
                 <p class="fw-bold">₹2,500</p>
                 <button class="btn-green" data-product-id="paithani3" data-title="Paithani Saree" data-price="2500" data-image-url="../assets/paithani3-img.jpg">Add to Cart</button>
               </div>
@@ -376,7 +376,7 @@
 
   <script src="script.js"></script>
     <script>
-        const BACKEND_URL = 'https://hand2heart-di.onrender.com';
+        const BACKEND_URL = '';
         document.addEventListener('DOMContentLoaded', () => {
             const productGrid = document.getElementById('product-grid');
             
@@ -384,12 +384,8 @@
                 if (!productGrid) return;
 
                 try {
-                    // FIX: Append a cache-busting timestamp to the API call URL
-                    const cacheBuster = new Date().getTime();
-                    const fetchUrl = BACKEND_URL + `/api/product/${category}?t=${cacheBuster}`; 
-
                     // Calls the new backend route /api/product/:category
-                    const response = await fetch(fetchUrl);
+                    const response = await fetch(BACKEND_URL + `/api/product/${category}`);
                     const data = await response.json();
 
                     if (response.ok && data.products && data.products.length > 0) {
@@ -399,7 +395,7 @@
                             const productCardHtml = `
                                 <div class="col">
                                     <div class="card h-100">
-                                        <img src="${product.imageUrl}" class="card-img-top" alt="${product.title}">
+                                        <img src="/${product.imageUrl}" class="card-img-top" alt="${product.title}">
                                         <div class="card-body">
                                             <h5 class="card-title">${product.title} (New!)</h5>
                                             <p class="card-text">${product.description || 'No description provided.'}</p>
@@ -409,7 +405,7 @@
                                                 data-product-id="${product._id}" 
                                                 data-title="${product.title}" 
                                                 data-price="${product.price}"
-                                                data-image-url="${product.imageUrl.replace(/\\/g, '/')}"
+                                                data-image-url="/${product.imageUrl.replace(/\\/g, '/')}"
                                             >
                                                 Add to Cart
                                             </button>

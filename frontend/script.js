@@ -1,7 +1,7 @@
 // frontend/script.js
 // Function to safely get an element and prevent errors if it doesn't exist
 const safeGetElement = (id) => document.getElementById(id);
-const BACKEND_URL = 'https://hand2heart-di.onrender.com';
+const BACKEND_URL = '';
 
 // *****************************************************************
 // 1. GLOBAL STATE AND CART FUNCTIONS
