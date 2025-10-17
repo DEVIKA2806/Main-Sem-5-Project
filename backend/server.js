@@ -8,6 +8,13 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 // const bodyParser is removed. Using Express built-in middleware for consistency.
 
+// --- CRITICAL ENV CHECK ---
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'your_jwt_secret_here') {
+    console.error("CRITICAL ERROR: JWT_SECRET environment variable is missing or using the placeholder value.");
+    console.error("Server cannot start securely. Please set a unique secret on Render.");
+    process.exit(1);
+}
+
 // 1. IMPORT ALL ROUTES
 const authRoutes = require('./routes/auth');
 const customerProductRoutes = require('./routes/products'); // Original, for basic read endpoints
@@ -43,26 +50,17 @@ app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/seller', sellerRoutes);
-
-// Existing product retrieval endpoint remains
 app.use('/api/products', customerProductRoutes); 
-// New, dedicated endpoint for seller/product logic
 app.use('/api/product', productCreationRoutes); 
-
 app.use('/api/delivery', deliveryRoutes); 
 
 // Serve assets (images, etc.) - IMPORTANT for uploaded images
 const ASSETS_DIR = path.join(__dirname, '../assets');
-
-// CORRECTED LINE: This single line correctly maps the virtual URL '/assets' 
-// to the physical directory where your images are saved.
 app.use('/assets', express.static(ASSETS_DIR)); 
 
 // Serve static frontend files
 const FRONTEND_DIR = path.join(__dirname, '../frontend');
 app.use(express.static(FRONTEND_DIR));
-
-// Fallback: index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
 });
