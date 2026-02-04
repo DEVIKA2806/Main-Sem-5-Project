@@ -33,6 +33,7 @@ const io = new Server(server);
 app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5000', credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('uploads'));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
@@ -43,6 +44,30 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(err => {
     console.error('MongoDB connection error:', err.message);
     process.exit(1);
+});
+
+// Dedicated Reseller Login Route
+app.post('/api/auth/reseller-login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) return res.status(404).json({ message: "Account not found" });
+
+        // BSc Level Check: Role Validation
+        if (user.role !== 'reseller') {
+            return res.status(403).json({ message: "Unauthorized: Account is not a registered Reseller." });
+        }
+
+        // Password Check & JWT Generation...
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
+
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
+        res.json({ token, user });
+    } catch (err) {
+        res.status(500).json({ message: "Server error" });
+    }
 });
 
 // --- API ROUTES ---
@@ -103,6 +128,9 @@ io.on('connection', (socket) => {
         console.log('Signaling user disconnected:', socket.id);
     });
 });
+
+const resellRoutes = require('./routes/resell');
+app.use('/api/resell', resellRoutes);
 
 server.listen(PORT, () => { // Use server.listen instead of app.listen
     console.log(`Server running on port ${PORT}`);

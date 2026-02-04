@@ -1,3 +1,25 @@
+<<<<<<< HEAD
+=======
+function getUser() {
+  return JSON.parse(localStorage.getItem('user'));
+}
+
+function getReseller() {
+  return JSON.parse(localStorage.getItem('reseller'));
+}
+
+function logoutUser() {
+  localStorage.removeItem('user');
+  localStorage.removeItem('token');
+}
+
+function logoutReseller() {
+  localStorage.removeItem('reseller');
+  localStorage.removeItem('resellerToken');
+}
+
+// frontend/script.js
+>>>>>>> 06684e430fb1ca972e73e9c885dd5031266e23aa
 // Function to safely get an element and prevent errors if it doesn't exist
 const safeGetElement = (id) => document.getElementById(id);
 const BACKEND_URL = ''; // Add your backend URL here if needed
@@ -529,8 +551,121 @@ function handleCheckout(method) {
     localStorage.removeItem('cart');
     closeCheckoutModal();
     
+<<<<<<< HEAD
     // Redirect to Order History page to see the new order
     window.location.href = 'orders.html';
+=======
+    // --- Mock Success Simulation ---
+    setTimeout(() => {
+        // Clear cart upon successful order
+        cart = [];
+        localStorage.removeItem('cart');
+        closeCheckoutModal();
+        alert(`Order placed successfully via ${paymentMethod}! Total: ₹${orderData.total.toFixed(2)}. Your items will be delivered soon!`);
+        window.location.href = 'index.html'; // Redirect to home after purchase
+    }, 1000);
+}
+    
+function openResell() {
+  const user = getUser();
+
+  if (!user) {
+    alert("Please login as a User to explore Resell.");
+    openLogin();
+    return;
+  }
+
+  window.location.href = 'resell.html';
+}
+
+function joinReseller() {
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    // 1. Check if they are already logged in as a standard User
+    if (user && user.role === 'user') {
+        const confirmLogout = confirm("To join as a Reseller, we need to log you out of your Customer account. Do you want to proceed?");
+        
+        if (confirmLogout) {
+            logout(); // This uses your existing global logout logic
+            // After logout/reload, the page will be clean for the reseller login
+        }
+        return; 
+    }
+
+    // 2. If already a Reseller, go straight to Dashboard
+    const resellerToken = localStorage.getItem('resellerToken');
+    if (resellerToken) {
+        window.location.href = 'reseller-dashboard.html';
+        return;
+    }
+
+    // 3. Otherwise, show the Reseller Login/Registration Modal
+    openSellerLogin(); 
+}
+
+
+function openResellerAuth() {
+    document.getElementById('resellerAuthModal').style.display = 'flex';
+}
+
+function closeResellerAuth() {
+    document.getElementById('resellerAuthModal').style.display = 'none';
+}
+
+function resellerLogin() {
+  const email = resellerEmail.value.trim();
+  const password = resellerPassword.value.trim();
+  const msg = resellerMsg;
+
+  fetch('/api/reseller/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.token) {
+      localStorage.setItem('reseller', JSON.stringify(data.reseller));
+      localStorage.setItem('resellerToken', data.token);
+      window.location.href = 'reseller-dashboard.html';
+    } else {
+      msg.textContent = data.message;
+    }
+  });
+}
+
+// --- CONTACT FUNCTION ---
+
+function closeContact() {
+    const contactModal = safeGetElement('contactModal');
+    if (contactModal) contactModal.style.display = 'none';
+    const contactMsg = safeGetElement('contactMsg');
+    const contactForm = safeGetElement('contactForm');
+    if (contactMsg) contactMsg.textContent = '';
+    if (contactForm) contactForm.reset();
+    window.history.back(); // FIX 3: Go back to the previous page
+}
+
+function openContact() {
+    const contactModal = document.getElementById('contactModal');
+    if (contactModal) {
+        contactModal.style.display = 'flex';
+    }
+}
+
+
+// --- DYNAMIC NAV BUTTON RENDERING ---
+function renderNavButton() {
+    const container = document.querySelector('.login').parentElement; // Found the parent of the .login button
+    if (!container) return;
+
+    const user = getLoggedInUser(); 
+    const token = localStorage.getItem('token');
+
+    // Assuming the HTML structure is already correct and we don't need to rebuild the button every time,
+    // just re-read the cart count. The original structure of `nav-right` is better left static if possible.
+    updateCartCount();
+>>>>>>> 06684e430fb1ca972e73e9c885dd5031266e23aa
 }
 
 
@@ -657,6 +792,7 @@ function fetchOrderHistory() {
                 `).join('')}
             </div>
 
+<<<<<<< HEAD
             <div class="order-total">
                 Total: ₹${order.total} <br>
                 <small style="font-size:0.8rem; color:#555;">Via ${order.method}</small>
@@ -665,3 +801,173 @@ function fetchOrderHistory() {
         `;
     }).reverse().join(''); // .reverse() shows newest orders first
 }
+=======
+// -------------------- REGISTRATION PAGE LOGIC --------------------
+const registerForm = safeGetElement('registerForm');
+
+if (registerForm) {
+    registerForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const name = safeGetElement('regName')?.value.trim();
+        const email = safeGetElement('regEmail')?.value.trim();
+        const password = safeGetElement('regPassword1')?.value.trim();
+        const confirmPassword = safeGetElement('regPassword2')?.value.trim();
+        const errorMsg = safeGetElement('regError');
+
+        if (password !== confirmPassword) {
+             if (errorMsg) {
+                errorMsg.style.color = "red";
+                errorMsg.textContent = "Passwords do not match!";
+            }
+            return;
+        }
+        
+        if (!name || !email || !password) {
+            if (errorMsg) {
+                errorMsg.style.color = "red";
+                errorMsg.textContent = "All fields are required.";
+            }
+            return;
+        }
+
+        fetch(BACKEND_URL + '/api/auth/register', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password }) 
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.token) {
+                errorMsg.style.color = "green";
+                errorMsg.textContent = "Registration successful! Redirecting to home...";
+                
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 1500);
+
+            } else {
+                errorMsg.style.color = "red";
+                errorMsg.textContent = data.message || "Registration failed.";
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            errorMsg.textContent = "Server error during Sign Up. Please try again.";
+        });
+    });
+}
+
+
+// -------------------- NEWSLETTER SUBMISSION --------------------
+const newsletterForm = safeGetElement("newsletterForm");
+if (newsletterForm) {
+    newsletterForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const emailInput = this.querySelector("input[type='email']");
+        const newsletterMsg = safeGetElement("newsletterMsg");
+
+        if (!emailInput.value.trim()) {
+            if (newsletterMsg) { newsletterMsg.style.color = "red"; newsletterMsg.textContent = "Please enter your email."; }
+            return;
+        }
+
+        const emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+        if (!emailInput.value.match(emailPattern)) {
+            if (newsletterMsg) { newsletterMsg.style.color = "red"; newsletterMsg.textContent = "Please enter a valid email."; }
+            return;
+        }
+
+        if (newsletterMsg) {
+            newsletterMsg.style.color = "lightgreen";
+            newsletterMsg.textContent = "Thank you for subscribing!";
+        }
+        emailInput.value = "";
+    });
+}
+
+// -------------------- SMOOTH SCROLL --------------------
+document.querySelectorAll('a[href^="#about-section"]').forEach(anchor => {
+    anchor.addEventListener("click", function(e) {
+        e.preventDefault();
+        const targetElement = document.querySelector(this.getAttribute("href"));
+        if (targetElement) { 
+            targetElement.scrollIntoView({
+                behavior: "smooth"
+            });
+        }
+    });
+});
+
+// Ensures the global logout function is available to the HTML buttons (Q1 & Q7 Fix)
+window.logout = window.logout || (() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('currentSellerId');
+    window.location.reload(); 
+});
+
+// Export checkout functions to global scope for HTML access (Q5 & Q6)
+window.openCheckoutModal = openCheckoutModal;
+window.closeCheckoutModal = closeCheckoutModal;
+window.handleCheckout = handleCheckout;
+window.validatePincode = validatePincode;
+
+
+// frontend/artifacts.js
+// === Shop Page JS ===
+
+// Toggle sidebar filters (for mobile)
+document.addEventListener("DOMContentLoaded", () => {
+              const filterBtn = document.createElement("button");
+              filterBtn.classList.add("filter-toggle");
+              filterBtn.innerText = "Toggle Filters";
+          
+              const container = document.querySelector(".container-fluid .row");
+              const sidebar = container.querySelector("aside");
+          
+              // Insert filter button before sidebar
+              sidebar.parentNode.insertBefore(filterBtn, sidebar);
+          
+              filterBtn.addEventListener("click", () => {
+                  sidebar.classList.toggle("active");
+              });
+          });
+
+// frontend/saree.js
+// === Shop Page JS ===
+
+// Toggle sidebar filters (for mobile)
+document.addEventListener("DOMContentLoaded", () => {
+    const filterBtn = document.createElement("button");
+    filterBtn.classList.add("filter-toggle");
+    filterBtn.innerText = "Toggle Filters";
+
+    const container = document.querySelector(".container-fluid .row");
+    const sidebar = container.querySelector("aside");
+
+    // Insert filter button before sidebar
+    sidebar.parentNode.insertBefore(filterBtn, sidebar);
+
+    filterBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("active");
+    });
+});
+
+function renderNavButton() {
+    const user = getLoggedInUser();
+    const resellBtn = document.querySelector('.resellerLogin');
+
+    if (user && (user.role === 'seller' || user.role === 'admin')) {
+        // Change "Join as Reseller" to "Seller Dashboard"
+        if (resellBtn) {
+            resellBtn.textContent = "Seller Dashboard";
+            resellBtn.onclick = () => window.location.href = 'seller-dashboard.html';
+        }
+    }
+}
+>>>>>>> 06684e430fb1ca972e73e9c885dd5031266e23aa
