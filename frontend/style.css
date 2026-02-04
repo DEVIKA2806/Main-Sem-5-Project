@@ -16,7 +16,7 @@ body {
     align-items: center;
     height: 95px;
     width: 100%;
-    background-color:#4F6F52;
+    background-color:#C08261;
     border-bottom: 2px solid rgba(0,0,0,0.1);
     padding: 0 30px;
     position: fixed;
@@ -82,14 +82,14 @@ body {
 }
 
 .cart:hover {
-  color:#3A4D39;
+  color:#212121;
 }
 
 #cart-count {
   position: absolute;
   top: -8px;
   right: -10px;
-  background: #739072;
+  background: #525352;
   color: white;
   font-size: 12px;
   font-weight: bold;
@@ -102,8 +102,8 @@ body {
     width: 40px;
     border-radius: 50%;
     border: none;
-    color: #ECE3CE;
-    background-color:#3A4D39;
+    color: #2e2e2d;
+    background-color:#C08261;
     font-size: 1.6rem;
     font-weight: 600;
     display: flex;               /* make it flexbox */
@@ -114,7 +114,7 @@ body {
 
 .login:hover {
     background-color:#ECE3CE;
-    color: #3A4D39;
+    color: #C08261;
 }
 
 
@@ -164,8 +164,10 @@ body {
 
 
 /* content-part */
+/* Reduce space between Slider and Cards */
 .main-content {
-    margin-top: 200px;
+    padding-top: 70px; /* Adjust this number (e.g., 0px or 10px) to decrease space */
+    margin-top: 0;     /* Ensures no extra margin is pushing it down */
 }
 
 /* Q2 FIX: Ensure horizontal alignment for the main category links */
@@ -202,37 +204,42 @@ body {
     object-fit: cover;
 }
 
+/* Shop Now Button Styling */
 .btn-green {
-    background-color: #3A4D39;
-    color: #ECE3CE;
-    border: none;
+    background-color: #C08261;  /* Terracotta Background initially */
+    color: #ECE3CE;             /* Cream Text initially */
+    border: 2px solid #C08261;  /* Terracotta Border */
     border-radius: 25px;
     padding: 10px 20px;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.btn-green:hover{
-    background-color: #4F6F52;
-    color: #ECE3CE;
+.btn-green:hover {
+    background-color: #ECE3CE;  /* Turns Cream on hover */
+    color: #C08261;             /* Text turns Terracotta */
+    border: 2px solid #C08261;  /* Border stays Terracotta */
 }
 
+/* Re-sell Button Styling */
 .btn-green-outline {
-    background-color: #ECE3CE;
-    border: 1px solid #3A4D39;
-    color: #3A4D39;
+    background-color: #C08261;  /* Terracotta Background initially */
+    color: #ECE3CE;             /* Cream Text initially */
+    border: 2px solid #C08261;  /* Terracotta Border */
     border-radius: 25px;
     padding: 10px 20px;
+    transition: all 0.3s ease;
 }
 
 .btn-green-outline:hover {
-    background-color: #4F6F52;
-    border: 1px solid #4F6F52;
-    color: #ECE3CE;
+    background-color: #ECE3CE;  /* Turns Cream on hover */
+    color: #C08261;             /* Text turns Terracotta */
+    border: 2px solid #C08261;  /* Border stays Terracotta */
 }
 
 .card-head {
     font-weight: 650;
-    color: #3A4D39;
+    color: #C08261;
     margin-top: 20px;
 }
 
@@ -259,8 +266,8 @@ body {
 
 .video-btn .user-type-btn:hover {
     background-color: #ECE3CE; /* beige */
-    color: #3A4D39; /* dark green */
-    border: 1px solid #3A4D39; /* Add a border to define the button shape */
+    color: #C08261; /* theme color */
+    border: 1px solid #C08261; /* Changed from green border */
     padding: 13px 27px; /* Adjust padding to account for the new border */
 }
 
@@ -271,7 +278,7 @@ body {
 }
 
 .about-head {
-    color: #4F6F52;
+    color: #C08261;
     text-align: center;
     margin-bottom: 20px;
 }
@@ -300,7 +307,8 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(58, 77, 57, 0.8); /* semi-transparent background */
+    /* Updated to match C08261 with transparency */
+    background-color: rgba(192, 130, 97, 0.85); 
     display: none;
     justify-content: center;
     align-items: center;
@@ -317,7 +325,7 @@ body {
 }
 
 .login-card h3 {
-    color: #3A4D39;
+    color: #C08261;
     margin-bottom: 20px;
 }
 
@@ -336,7 +344,7 @@ body {
     padding: 12px;
     border: none;
     border-radius: 25px;
-    background-color: #3A4D39;
+    background-color: #C08261;
     color: #ECE3CE;
     font-size: 1rem;
     cursor: pointer;
@@ -344,19 +352,19 @@ body {
 }
 
 .login-card button:hover {
-    background-color: #4F6F52;
+    background-color: #A06B50; /* Slightly darker */
 }
 
 .login-card .close-btn {
     background-color: transparent;
-    color: #3A4D39;
-    border: 1px solid #3A4D39;
+    color: #C08261;
+    border: 1px solid #C08261; /* Updated from Green */
 }
 
 .login-card .close-btn:hover {
-    background-color: #4F6F52;
+    background-color: #C08261;
     color: #ECE3CE;
-    border: 1px solid #4F6F52;
+    border: 1px solid #C08261;
 }
 
 .login-card .error {
@@ -393,7 +401,7 @@ body {
 }
 
 .login-card h3 {
-    color: #3A4D39; /* Dark green heading */
+    color: #C08261; /* Theme heading */
     margin-bottom: 25px;
 }
 
@@ -413,7 +421,7 @@ body {
     width: 100%;
     margin-bottom: 10px;
     /* Inherits colors from your main .btn-green: */
-    background-color: #3A4D39; 
+    background-color: #C08261; 
     color: #ECE3CE;
     border: none;
     padding: 12px;
@@ -421,7 +429,7 @@ body {
 }
 
 .login-card button.btn-green:hover {
-    background-color: #4F6F52;
+    background-color: #A06B50;
 }
 
 /* 5. Error Message Area */
@@ -440,14 +448,14 @@ body {
 }
 
 .login-card p a {
-    color: #4F6F52; /* Light green link color */
+    color: #C08261; /* Link color */
     font-weight: 600;
     text-decoration: none;
 }
 
 .login-card p a:hover {
     text-decoration: underline;
-    color: #3A4D39; /* Dark green on hover */
+    color: #A06B50; 
 }
 
 /* Contact Us Modal Styles */
@@ -458,14 +466,14 @@ body {
     width: 100%;
     height: 100vh;
     display: none;
-    background-color: rgba(58, 77, 57, 0.8);
+    background-color: rgba(112, 110, 109, 0.85); /* Updated to match theme with transparency */
     justify-content: center;
     align-items: center;
     z-index: 2000;
 }
 
 .contact-card {
-    background-color: #3A4D39;
+    background-color: #C08261;
     padding: 30px;
     border-radius: 20px;
     width: 100%;
@@ -498,9 +506,9 @@ body {
 .contact-card button {
     width: 100%;
     padding: 12px;
-    background-color: #4F6F52;
+    background-color: #C08261;
     color: #ECE3CE;
-    border: none;
+    border: 2px solid #ECE3CE; /* Added border for visibility on same color bg */
     border-radius: 25px;
     font-size: 1rem;
     cursor: pointer;
@@ -509,7 +517,8 @@ body {
 }
 
 .contact-card button:hover {
-    background-color: #3A4D39;
+    background-color: #ECE3CE;
+    color: #C08261;
 }
 
 .contact-card .close-btn {
@@ -520,7 +529,7 @@ body {
 
 .contact-card .close-btn:hover {
     background-color: #ECE3CE;
-    color: #3A4D39;
+    color: #C08261;
 }
 
 .contact-message {
@@ -536,7 +545,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(58, 77, 57, 0.8);
+    background-color: rgba(192, 130, 97, 0.85); /* Updated transparency */
     display: none;
     justify-content: center;
     align-items: center;
@@ -555,7 +564,7 @@ body {
 }
 
 .modal-card h2 {
-    color: #3A4D39;
+    color: #C08261;
     margin-bottom: 20px;
 }
 
@@ -585,7 +594,7 @@ body {
     padding: 12px;
     border: none;
     border-radius: 25px;
-    background-color: #3A4D39;
+    background-color: #C08261;
     color: #ECE3CE;
     font-size: 1rem;
     cursor: pointer;
@@ -593,7 +602,7 @@ body {
 }
 
 .modal-card button:hover {
-    background-color: #4F6F52;
+    background-color: #A06B50;
 }
 
 .modal-card button.close-btn {
@@ -602,20 +611,20 @@ body {
 }
 
 .modal-card .close-btn:hover {
-    background-color: #4F6F52;
+    background-color: #C08261;
     color: #ECE3CE;
-    border: 1px solid #4F6F52;
+    border: 1px solid #C08261;
 }
 
 .modal-message {
-    color: green;
+    color: #C08261; /* Updated success message color */
     font-size: 0.9rem;
     margin-top: 10px;
 }
 
 /* footer */
 .site-footer {
-  background-color: #3A4D39; /* dark green background */
+  background-color: #C08261; /* dark theme background */
   color: #ECE3CE; /* light cream text */
   padding: 40px 20px 20px;
   margin-top: 50px;
@@ -643,7 +652,7 @@ body {
 }
 
 .footer-section a:hover {
-  color: #4F6F52; /* lighter green hover */
+  color: #2C2C2C; /* Darker hover */
 }
 
 .footer-section ul {
@@ -660,7 +669,7 @@ body {
 }
 
 .footer-section ul li a:hover {
-  color: #4F6F52;
+  color: #2C2C2C;
 }
 
 /* Newsletter Form */
@@ -678,21 +687,24 @@ body {
   outline: none;
 }
 
+/* Newsletter Form Button Styles */
+/* Newsletter Form Button Styles */
 #newsletterForm button {
-  background-color: #4F6F52;
-  color: #ECE3CE;
-  border: none;
-  border-radius: 25px;
-  padding: 10px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: 0.3s ease;
-}
-
-#newsletterForm button:hover {
-  background-color: #ECE3CE;
-  color: #3A4D39;
-}
+    background-color: #ECE3CE;  /* Cream background initially */
+    color: #C08261;             /* Terracotta text */
+    border: 2px solid #FFFFFF;  /* WHITE BORDER */
+    border-radius: 25px;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  #newsletterForm button:hover {
+    background-color: #C08261;  /* Turns Terracotta on hover */
+    color: #ECE3CE;             /* Text turns Cream */
+    border: 2px solid #FFFFFF;  /* Border stays White */
+  }
 
 #newsletterMsg {
   margin-top: 8px;
@@ -710,7 +722,7 @@ body {
 }
 
 .social-links a:hover {
-  color: #4F6F52;
+  color: #2C2C2C;
 }
 
 /* Footer bottom */
@@ -737,12 +749,12 @@ body {
 }
 
 .dashboard-container h1 {
-    color: #3A4D39;
+    color: #C08261; /* Updated from Green */
     margin-bottom: 5px;
 }
 
 .dashboard-container p {
-    color: #4F6F52;
+    color: #C08261; /* Updated from Green */
     margin-bottom: 25px;
 }
 
@@ -752,7 +764,7 @@ body {
     margin-top: 15px;
     margin-bottom: 5px;
     font-weight: 600;
-    color: #3A4D39;
+    color: #C08261; /* Updated from Green */
 }
 
 /* Styling for all form inputs and select element */
@@ -778,7 +790,7 @@ body {
 
 /* Styling the "Add Item" button */
 .product-form button {
-    background-color: #3A4D39; 
+    background-color: #C08261; /* Updated from Green */
     color: #ECE3CE;
     padding: 15px 20px;
     margin-top: 30px;
@@ -791,7 +803,7 @@ body {
 }
 
 .product-form button:hover {
-     background-color: #4F6F52; 
+     background-color: #A06B50; 
 }
 
 /* Styling for the new "Already a Seller? Log In" button */
@@ -810,4 +822,184 @@ body {
 
 .btn-seller-shortcut:hover {
     background-color: #888888 !important;
+}
+
+/* Controls the height and fit of the images */
+.banner-img {
+    height: 450px;           /* Standard Desktop Height */
+    object-fit: cover;       /* Ensures the image fills the box without stretching */
+    object-position: center; /* Keeps the focus in the middle */
+    filter: brightness(0.85); /* Slightly darkens image so white text is readable */
+}
+
+/* Styling for the text over the images */
+.carousel-caption h2 {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.7); /* Adds black shadow behind text */
+}
+
+.carousel-caption p {
+    font-size: 1.1rem;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+}
+
+#heroCarousel {
+    margin-top: 150px; /* Change this number to increase/decrease space */
+}
+
+/* --- Mobile Responsiveness --- */
+/* This makes the slider smaller on phones so it looks like an App */
+@media (max-width: 768px) {
+    .banner-img {
+        height: 600px;           /* INC  REASED from 450px to 600px */
+        object-fit: cover;       /* Keeps image perfect, doesn't stretch */
+        object-position: center; 
+        filter: brightness(0.85);
+    }
+    
+    .carousel-caption h2 {
+        font-size: 1rem;     /* Smaller text */
+    }
+    
+    .carousel-caption p {
+        font-size: 0.8rem;
+        margin-bottom: 0;
+    }
+}
+
+
+/* Checkout Modal Styling */
+#checkoutForm input {
+    height: 45px; /* Ensures all inputs are the same height */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* The Locate Me Button */
+#checkoutForm button.btn-outline-secondary {
+    height: 45px; /* Matches input height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* Space between icon and text */
+    transition: all 0.3s ease;
+    color: #C08261;
+    border-color: #C08261;
+}
+
+#checkoutForm button.btn-outline-secondary:hover {
+    background-color: #C08261; /* Updated Hover */
+    color: white;
+    border-color: #C08261;
+}
+
+/* --- USER PROFILE MENU STYLES --- */
+
+/* Wrapper for positioning */
+.user-menu-wrap {
+    position: relative;
+    margin-left: 15px;
+}
+
+/* The Circle Avatar */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #ECE3CE; /* Cream Background */
+    color: #C08261;            /* Terracotta Text */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border: 2px solid #ECE3CE; 
+    transition: all 0.3s ease;
+}
+
+.user-avatar:hover {
+    background-color: #C08261;
+    color: #ECE3CE;
+    border-color: #ECE3CE;
+}
+
+/* The Dropdown Box */
+.profile-dropdown {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 55px;     /* Push it down below navbar */
+    right: 0;      /* Align to right edge */
+    width: 250px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    border: 1px solid #ddd;
+    overflow: hidden;
+    z-index: 2000;
+}
+
+/* Visible class toggled by JS */
+.profile-dropdown.active {
+    display: block;
+}
+
+/* Header with Name/Email */
+.dropdown-header {
+    background-color: #C08261;
+    color: #ECE3CE;
+    padding: 15px;
+    text-align: center;
+}
+
+.dropdown-header p {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.dropdown-header small {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    display: block;
+    margin-top: 2px;
+}
+
+/* Menu List Items */
+.profile-dropdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.profile-dropdown ul li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: background 0.2s;
+}
+
+.profile-dropdown ul li a:hover {
+    background-color: #f9f9f9;
+    color: #C08261;
+}
+
+.profile-dropdown ul li a i {
+    color: #C08261; /* Icon color */
+    width: 20px;
+    text-align: center;
+}
+
+/* Divider Line */
+.profile-dropdown .divider {
+    height: 1px;
+    background-color: #eee;
+    margin: 4px 0;
 }

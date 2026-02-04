@@ -33,12 +33,40 @@
             </ul>
         </div>
         <div class="nav-right">
-<div class="cart" onclick="window.location.href='cart.html'">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span id="cart-count">0</span>
-            </div>
-            <div class="login" onclick="openLogin()"><i class="fa-solid fa-user"></i></div>
+    <div class="cart" onclick="window.location.href='cart.html'">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span id="cart-count">0</span>
+    </div>
+
+    <div id="guest-btn" class="login" onclick="openLogin()">
+        <i class="fa-solid fa-user"></i>
+    </div>
+
+    <div id="user-menu-container" class="user-menu-wrap" style="display: none;">
+        <div class="user-avatar" onclick="toggleUserMenu()">
+            <span id="user-initial">U</span>
         </div>
+
+        <div id="user-dropdown" class="profile-dropdown">
+            <div class="dropdown-header">
+                <p id="menu-name">User Name</p>
+                <small id="menu-email">user@email.com</small>
+            </div>
+            <ul>
+                <li><a href="profile.html"><i class="fa-solid fa-id-badge"></i> My Profile</a></li>
+                <li><a href="orders.html"><i class="fa-solid fa-box-open"></i> Order History</a></li>
+                <li class="divider"></li>
+                <li><a href="#" onclick="logoutUser()"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="sell-btn">
+        <button class="btn btn-green-outline" onclick="openSeller()">
+            Join as Seller <i class="fa-solid fa-handshake-simple"></i>
+        </button>
+    </div>
+</div>
 
     </div>
 
