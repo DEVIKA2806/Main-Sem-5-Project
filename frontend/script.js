@@ -1,3 +1,21 @@
+function getUser() {
+  return JSON.parse(localStorage.getItem('user'));
+}
+
+function getReseller() {
+  return JSON.parse(localStorage.getItem('reseller'));
+}
+
+function logoutUser() {
+  localStorage.removeItem('user');
+  localStorage.removeItem('token');
+}
+
+function logoutReseller() {
+  localStorage.removeItem('reseller');
+  localStorage.removeItem('resellerToken');
+}
+
 // frontend/script.js
 // Function to safely get an element and prevent errors if it doesn't exist
 const safeGetElement = (id) => document.getElementById(id);
@@ -636,34 +654,74 @@ function handleCheckout(paymentMethod) {
         window.location.href = 'index.html'; // Redirect to home after purchase
     }, 1000);
 }
-
-
-// --- RE-SELL (Coming Soon) ---
-
+    
 function openResell() {
-    const resellModal = safeGetElement('resellModal');
-    if (resellModal) {
-        const modalCard = resellModal.querySelector('.modal-card');
-        if (modalCard) {
-            modalCard.innerHTML = `
-                <h2>Re-Sell Feature</h2>
-                <div id="resellMsg">
-                    <p style="text-align: center; font-size: 1.2em; color: #3A4D39; margin: 20px 0;">
-                        This feature is **Coming Soon**! We're building the best platform for re-sellers.
-                    </p>
-                </div>
-                <button type="button" class="close-btn" onclick="closeResell()">Close</button>
-            `;
+  const user = getUser();
+
+  if (!user) {
+    alert("Please login as a User to explore Resell.");
+    openLogin();
+    return;
+  }
+
+  window.location.href = 'resell.html';
+}
+
+function joinReseller() {
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    // 1. Check if they are already logged in as a standard User
+    if (user && user.role === 'user') {
+        const confirmLogout = confirm("To join as a Reseller, we need to log you out of your Customer account. Do you want to proceed?");
+        
+        if (confirmLogout) {
+            logout(); // This uses your existing global logout logic
+            // After logout/reload, the page will be clean for the reseller login
         }
-        resellModal.style.display = 'flex';
+        return; 
     }
+
+    // 2. If already a Reseller, go straight to Dashboard
+    const resellerToken = localStorage.getItem('resellerToken');
+    if (resellerToken) {
+        window.location.href = 'reseller-dashboard.html';
+        return;
+    }
+
+    // 3. Otherwise, show the Reseller Login/Registration Modal
+    openSellerLogin(); 
 }
 
-function closeResell() {
-    const resellModal = safeGetElement('resellModal');
-    if (resellModal) resellModal.style.display = 'none';
+
+function openResellerAuth() {
+    document.getElementById('resellerAuthModal').style.display = 'flex';
 }
 
+function closeResellerAuth() {
+    document.getElementById('resellerAuthModal').style.display = 'none';
+}
+
+function resellerLogin() {
+  const email = resellerEmail.value.trim();
+  const password = resellerPassword.value.trim();
+  const msg = resellerMsg;
+
+  fetch('/api/reseller/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.token) {
+      localStorage.setItem('reseller', JSON.stringify(data.reseller));
+      localStorage.setItem('resellerToken', data.token);
+      window.location.href = 'reseller-dashboard.html';
+    } else {
+      msg.textContent = data.message;
+    }
+  });
+}
 
 // --- CONTACT FUNCTION ---
 
@@ -963,4 +1021,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// Removed search filter: now handled by script.js globally.
+function renderNavButton() {
+    const user = getLoggedInUser();
+    const resellBtn = document.querySelector('.resellerLogin');
+
+    if (user && (user.role === 'seller' || user.role === 'admin')) {
+        // Change "Join as Reseller" to "Seller Dashboard"
+        if (resellBtn) {
+            resellBtn.textContent = "Seller Dashboard";
+            resellBtn.onclick = () => window.location.href = 'seller-dashboard.html';
+        }
+    }
+}
