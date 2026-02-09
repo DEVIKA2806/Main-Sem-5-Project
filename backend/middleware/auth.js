@@ -1,16 +1,21 @@
 const jwt = require('jsonwebtoken');
 
-function auth(req, res, next) {
-  const authHeader = req.headers.authorization || req.headers.Authorization;
-  if (!authHeader?.startsWith('Bearer ')) return res.status(401).json({ message: 'Unauthorized' });
-  const token = authHeader.split(' ')[1];
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = payload; 
-    next();
-  } catch (err) {
-    return res.status(403).json({ message: 'Invalid token' });
-  }
-}
+module.exports = function(roleRequired) {
+    return function(req, res, next) {
+        const token = req.header('x-auth-token');
+        if (!token) return res.status(401).json({ msg: 'No token, authorization denied' });
 
-module.exports = auth;
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = decoded.user;
+
+            // Strict Role Check: Ensure only authorized roles can access specific routes
+            if (roleRequired && req.user.role !== roleRequired) {
+                return res.status(403).json({ msg: `Access denied: Requires ${roleRequired} role` });
+            }
+            next();
+        } catch (err) {
+            res.status(401).json({ msg: 'Token is not valid' });
+        }
+    };
+};

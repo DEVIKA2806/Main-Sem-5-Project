@@ -1,53 +1,46 @@
+// routes/resell.js
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const router = express.Router();
-// Assuming you have a ResellItem model
-// const ResellItem = require('../models/ResellItem'); 
+const resellerAuth = require('../middleware/resellerAuth');
 
-// 1. Configure Storage
+const uploadDir = 'uploads/resell';
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/resell/'); // Ensure this folder exists!
-    },
+    destination: (req, file, cb) => cb(null, uploadDir),
     filename: (req, file, cb) => {
-        // Creates a unique filename: Date + Original Name
         cb(null, Date.now() + path.extname(file.originalname));
     }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-// 2. The POST Route
-// 'image' matches the name attribute in your FormData or file input
-router.post('/add', upload.single('image'), async (req, res) => {
+// routes/resell.js
+
+// Ensure this matches the HTML: <input type="file" name="image" ...>
+router.post('/add', resellerAuth, upload.single('image'), async (req, res) => {
     try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No file received' });
+        }
+
         const { name, description, category, itemType, price } = req.body;
-        
-        // The path to the uploaded image
         const imageUrl = `/uploads/resell/${req.file.filename}`;
 
-        // logic to save to your database (MongoDB/SQL)
-        /* const newItem = new ResellItem({
-            name,
-            description,
-            category,
-            itemType,
-            price: parseFloat(price),
-            imageUrl,
-            sellerId: req.user.id // From your auth middleware
-        });
-        await newItem.save();
-        */
-
-        res.status(200).json({ 
-            success: true, 
-            message: 'Item added successfully!',
-            data: { name, imageUrl } 
+        // Return a proper JSON response so frontend doesn't get "undefined"
+        res.status(200).json({
+            success: true,
+            message: 'Item uploaded successfully!',
+            data: { name, imageUrl }
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        console.error("Backend Upload Error:", error);
+        res.status(500).json({ success: false, message: 'Server failed to process upload' });
     }
 });
 

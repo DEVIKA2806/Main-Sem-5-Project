@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 function getUser() {
   return JSON.parse(localStorage.getItem('user'));
 }
@@ -18,9 +16,6 @@ function logoutReseller() {
   localStorage.removeItem('resellerToken');
 }
 
-// frontend/script.js
->>>>>>> 06684e430fb1ca972e73e9c885dd5031266e23aa
-// Function to safely get an element and prevent errors if it doesn't exist
 const safeGetElement = (id) => document.getElementById(id);
 const BACKEND_URL = ''; // Add your backend URL here if needed
 
@@ -46,6 +41,42 @@ function getLoggedInUser() {
         return JSON.parse(user);
     }
     return null;
+    return (token && user) ? user : null;
+}
+
+window.addEventListener('load', () => {
+    const user = getLoggedInUser();
+    if (user) {
+        console.log("Session active for:", user.role);
+    }
+    renderNavButton(); 
+});
+
+// frontend/script.js
+
+function logout(shouldReload = true) {
+    // Clear all session data
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('currentSellerId');
+    localStorage.removeItem('resellerToken');
+    localStorage.removeItem('reseller');
+    
+    // Clear cart
+    cart = []; 
+    localStorage.removeItem('cart');
+    updateCartCount();
+    
+    // Close any open standard login modal
+    closeLogin();
+    
+    // FIX: Only reload if true. 
+    // If we are switching to Reseller, we pass 'false' to stay on the page.
+    if (shouldReload) {
+        setTimeout(() => {
+            window.location.reload(); 
+        }, 100);
+    }
 }
 
 function addToCart(productId, title, price, imageUrl) {
@@ -208,11 +239,30 @@ function closeLogin() {
     if (modalError) modalError.textContent = '';
 }
 
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('currentSellerId');
+    cart = []; 
+    localStorage.removeItem('cart');
+    updateCartCount();
+    closeLogin();
+    
+    setTimeout(() => {
+        window.location.reload(); 
+    }, 100);
+}
+
+
+// *****************************************************************
+// 3. USER LOGIN
+// *****************************************************************
 function openLogin() {
     const loginModal = safeGetElement('loginModal');
     if (!loginModal) return;
 
     const user = getLoggedInUser(); 
+    const reseller = getReseller(); // Check if reseller data exists
     const loginCard = loginModal.querySelector('.login-card');
     
     // Block seller/admin from standard login
@@ -225,19 +275,45 @@ function openLogin() {
         `;
     } else {
         // Standard Login Form
+
+    if (reseller) {
+        // If logged in as Reseller, they must log out here to become a standard User again
+        loginCard.innerHTML = `
+            <h3>Reseller Portal Active</h3>
+            <p>Welcome, ${reseller.name}. You are currently browsing as a Reseller.</p>
+            <p style="font-size: 0.8em; color: #666;">To login as a normal user, please logout from your Reseller account first.</p>
+            <button class="btn btn-green w-100 mb-2" onclick="logoutReseller(); window.location.reload();">Log Out from Reseller</button>
+            <button class="close-btn" onclick="closeLogin()">Close</button>
+        `;
+    } 
+    else if (user && (user.role === 'seller' || user.role === 'admin')) { 
+         loginCard.innerHTML = `
+            <h3>Access Denied - Seller Portal Active</h3>
+            <p>You are currently logged in as a **Seller/Admin**.</p>
+            <button class="btn btn-green w-100 mb-2" onclick="logout(); closeLogin();">Log Out to Login as Customer</button>
+            <button class="close-btn" onclick="closeLogin()">Close</button>
+        `;
+    } 
+    else if (user) {
+         loginCard.innerHTML = `
+            <h3>Welcome Back, ${user.name}!</h3>
+            <button class="btn btn-green w-100 mb-2" onclick="logout()">Log Out</button>
+            <button class="close-btn" onclick="closeLogin()">Close</button>
+        `;
+    } 
+    else {
         loginCard.innerHTML = `
             <h3>User Login</h3>
             <input type="email" id="modalUsername" placeholder="Email" />
             <input type="password" id="modalPassword" placeholder="Password" />
             <div id="modalError" class="error"></div>
             <button onclick="validateModalLogin()">Login</button>
-            
             <button class="sign-in-btn" onclick="window.location.href='register.html'; closeLogin()">Sign Up</button>
             <button type="button" class="close-btn" onclick="closeLogin()">Close</button>
         `;
     }
-    
     loginModal.style.display = 'flex';
+}
 }
 
 function validateModalLogin() {
@@ -272,6 +348,7 @@ function validateModalLogin() {
 
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user)); // Saves User Object
+            localStorage.setItem('user', JSON.stringify(data.user));
             localStorage.removeItem('currentSellerId'); 
 
             closeLogin();
@@ -293,10 +370,20 @@ function validateModalLogin() {
 // *****************************************************************
 // 3. SELLER LOGIN/REGISTRATION
 // *****************************************************************
+// 4. SELLER MODAL
+// *****************************************************************
 
 function openSellerLogin() {
     const sellerModal = safeGetElement('sellerModal');
     if (!sellerModal) return;
+    if (!sellerModal) { console.error('Seller modal not found'); return; }
+
+    const user = getLoggedInUser();
+    if (user && user.role === 'user') {
+        openSeller(); 
+        return;
+    }
+
     const modalCard = sellerModal.querySelector('.modal-card');
     
     modalCard.innerHTML = `
@@ -333,6 +420,10 @@ function validateSellerLogin() {
     .then(res => res.json())
     .then(data => {
         if (data.token && data.user && (data.user.role === 'seller' || data.user.role === 'admin')) { 
+        if (data.token && data.user && (data.user.role === 'seller' || data.user.role === 'admin') && data.user.sellerId) { 
+            errorMsg.style.color = "green";
+            errorMsg.textContent = `Login successful! Status: ${data.user.status}. Redirecting to dashboard...`; 
+
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             if(data.user.sellerId) localStorage.setItem('currentSellerId', data.user.sellerId);
@@ -342,7 +433,8 @@ function validateSellerLogin() {
             errorMsg.style.color = "red";
             errorMsg.textContent = "Invalid credentials.";
         }
-    })
+    }
+})
     .catch(err => {
         errorMsg.style.color = "red";
         errorMsg.textContent = "Server error.";
@@ -380,19 +472,80 @@ function openSeller() {
         const form = safeGetElement('sellerForm');
         if (form) form.addEventListener('submit', handleSellerRegistration);
     }, 0);
+    if (user && user.role === 'user') {
+        modalCard.innerHTML = `
+            <h2>Seller Access Policy</h2>
+            <h3>Hello, ${user.name}!</h3>
+            <p style="margin: 15px 0; color: #3A4D39; font-weight: 500;">
+                You must **log out of your current User session** to proceed with Seller actions.
+            </p>
+            
+            <button type="button" class="btn-green" onclick="logout(); closeSeller(); setTimeout(() => { openSeller(); }, 100);">
+                Log Out First & Register/Log In as Seller
+            </button>
+            
+            <button type="button" class="close-btn" onclick="closeSeller()">Close</button>
+        `;
+    } else {
+        modalCard.innerHTML = registrationFormHtml;
+        setTimeout(() => {
+            const form = safeGetElement('sellerForm');
+            if (form) form.addEventListener('submit', handleSellerRegistration);
+        }, 0);
+    }
     
     sellerModal.style.display = 'flex';
 }
 
 function handleSellerRegistration(e) {
     e.preventDefault();
-    const name = safeGetElement('sellerName').value.trim();
-    const email = safeGetElement('sellerEmail').value.trim();
-    const password = safeGetElement('sellerPassword').value.trim();
-    const business = safeGetElement('sellerBusiness').value.trim();
-    
-    // Mock Registration for brevity - Ensure backend fetch is here in real code
-    alert('Feature requires backend setup. Check console for structure.');
+
+    const name = safeGetElement('sellerName')?.value.trim();
+    const email = safeGetElement('sellerEmail')?.value.trim();
+    const phone = safeGetElement('sellerPhone')?.value.trim() || '';
+    const business = safeGetElement('sellerBusiness')?.value.trim();
+    const products = safeGetElement('sellerProducts')?.value.trim() || '';
+    const password = safeGetElement('sellerPassword')?.value.trim();
+    const sellerMsg = safeGetElement('sellerMsg');
+
+    if (!name || !email || !business || !password) {
+        sellerMsg.style.color = "red";
+        sellerMsg.textContent = "Please fill all required fields.";
+        return;
+    }
+
+    sellerMsg.style.color = "orange";
+    sellerMsg.textContent = "Submitting application...";
+
+    fetch('/api/seller/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, business, products, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.token && data.user && data.user.sellerId) {
+            sellerMsg.style.color = "green";
+            sellerMsg.textContent = "Registration successful! Redirecting...";
+
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('currentSellerId', data.user.sellerId);
+
+            setTimeout(() => {
+                window.location.href = 'seller-dashboard.html';
+            }, 700);
+
+        } else {
+            sellerMsg.style.color = "red";
+            sellerMsg.textContent = data.message || "Registration failed.";
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        sellerMsg.style.color = "red";
+        sellerMsg.textContent = "Server error.";
+    });
 }
 
 function closeSeller() {
@@ -403,6 +556,7 @@ function closeSeller() {
 
 // *****************************************************************
 // 4. CHECKOUT & LOCATION FUNCTIONS (High Accuracy)
+// 5. CHECHOUT DASHBOARD
 // *****************************************************************
 
 function closeCheckoutModal() {
@@ -424,7 +578,7 @@ function openCheckoutModal() {
 
     const checkoutModal = safeGetElement('checkoutModal');
     const checkoutForm = safeGetElement('checkoutForm');
-    
+    if (!checkoutModal || !checkoutForm) return;
     const name = deliveryDetails.name || user.name || '';
     const contact = deliveryDetails.contact || '';
     const address = deliveryDetails.address || '';
@@ -459,6 +613,10 @@ function openCheckoutModal() {
     `;
     
     if(pincode) validatePincode(pincode);
+    if(pincode) {
+        validatePincode(pincode);
+    }
+    
     checkoutModal.style.display = 'flex';
 }
 
@@ -473,6 +631,8 @@ function fillCurrentLocation() {
 
     addressInput.value = "";
     addressInput.placeholder = "Fetching precise location...";
+    pincodeStatus.style.color = 'orange';
+    pincodeStatus.textContent = `Verifying Pincode ${pincode}...`;
 
     const options = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
 
@@ -525,117 +685,196 @@ function validatePincode(val) {
 // --- PASTE THE NEW VERSION HERE ---
 function handleCheckout(method) {
     const user = getLoggedInUser();
-    
-    // 1. Calculate Total
+
+    if (!user) {
+        alert("Please login first.");
+        openLogin();
+        return;
+    }
+
+    if (cart.length === 0) {
+        alert("Cart is empty.");
+        return;
+    }
+
+    // Calculate total
     const totalAmount = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-    // 2. Create Order Object
+    // Create order
     const newOrder = {
-        id: 'ORD-' + Date.now().toString().slice(-6), // Random ID
+        id: 'ORD-' + Date.now().toString().slice(-6),
         date: new Date().toLocaleDateString(),
-        userEmail: user ? user.email : 'guest',
+        userEmail: user.email,
         items: cart,
         total: totalAmount.toFixed(2),
         method: method,
         status: 'Processing'
     };
 
-    // 3. Save to LocalStorage (So it shows up in Order History)
+    // Save order history
     const currentHistory = JSON.parse(localStorage.getItem('orderHistory')) || [];
     currentHistory.push(newOrder);
     localStorage.setItem('orderHistory', JSON.stringify(currentHistory));
 
-    // 4. Clear Cart & Redirect
-    alert(`Order Placed Successfully via ${method}!`);
+    // Clear cart
     cart = [];
     localStorage.removeItem('cart');
+    updateCartCount();
+
     closeCheckoutModal();
-    
-<<<<<<< HEAD
-    // Redirect to Order History page to see the new order
+
+    alert("Order placed successfully!");
+
+    // redirect
     window.location.href = 'orders.html';
-=======
-    // --- Mock Success Simulation ---
-    setTimeout(() => {
-        // Clear cart upon successful order
-        cart = [];
-        localStorage.removeItem('cart');
-        closeCheckoutModal();
-        alert(`Order placed successfully via ${paymentMethod}! Total: ₹${orderData.total.toFixed(2)}. Your items will be delivered soon!`);
-        window.location.href = 'index.html'; // Redirect to home after purchase
-    }, 1000);
 }
-    
+
+
+// *****************************************************************
+// 6. RESELL MODAL
+// *****************************************************************
+// Requirement 1 & 6: Navigate to Resell page only if logged in as standard User
 function openResell() {
-  const user = getUser();
-
-  if (!user) {
-    alert("Please login as a User to explore Resell.");
-    openLogin();
-    return;
-  }
-
-  window.location.href = 'resell.html';
+    const user = getLoggedInUser();
+    if (!user) {
+        alert("Please login as a User to explore Resell.");
+        openLogin();
+        return;
+    }
+    window.location.href = 'resell.html';
 }
 
 function joinReseller() {
-    const user = JSON.parse(localStorage.getItem('user'));
-
-    // 1. Check if they are already logged in as a standard User
-    if (user && user.role === 'user') {
-        const confirmLogout = confirm("To join as a Reseller, we need to log you out of your Customer account. Do you want to proceed?");
-        
-        if (confirmLogout) {
-            logout(); // This uses your existing global logout logic
-            // After logout/reload, the page will be clean for the reseller login
-        }
-        return; 
-    }
-
-    // 2. If already a Reseller, go straight to Dashboard
+    const user = getLoggedInUser();
     const resellerToken = localStorage.getItem('resellerToken');
+
     if (resellerToken) {
         window.location.href = 'reseller-dashboard.html';
         return;
     }
 
-    // 3. Otherwise, show the Reseller Login/Registration Modal
-    openSellerLogin(); 
-}
-
-
-function openResellerAuth() {
-    document.getElementById('resellerAuthModal').style.display = 'flex';
-}
-
-function closeResellerAuth() {
-    document.getElementById('resellerAuthModal').style.display = 'none';
+    if (user && user.role === 'user') {
+        const confirmLogout = confirm("To act as a Reseller, you must log out of your Customer account. Proceed to Reseller Portal?");
+        if (confirmLogout) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            document.getElementById('resellerModal').style.display = 'flex';
+            toggleResellerAuth(false); // Start on Login view
+        }
+    } else {
+        document.getElementById('resellerModal').style.display = 'flex';
+        toggleResellerAuth(false);
+    }
 }
 
 function resellerLogin() {
-  const email = resellerEmail.value.trim();
-  const password = resellerPassword.value.trim();
-  const msg = resellerMsg;
+    const email = document.getElementById("resEmail").value.trim();
+    const password = document.getElementById("resPassword").value.trim();
+    const msg = document.getElementById("resMsg");
 
-  fetch('/api/reseller/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.token) {
-      localStorage.setItem('reseller', JSON.stringify(data.reseller));
-      localStorage.setItem('resellerToken', data.token);
-      window.location.href = 'reseller-dashboard.html';
-    } else {
-      msg.textContent = data.message;
+    if (!email || !password) {
+        msg.textContent = "Please fill in all fields.";
+        return;
     }
-  });
+
+    fetch('/api/auth/reseller-login', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.token && data.user && data.user.role === 'reseller') {
+            // Save Reseller Session
+            localStorage.setItem('reseller', JSON.stringify(data.user));
+            localStorage.setItem('resellerToken', data.token);
+            
+            msg.style.color = "green";
+            msg.textContent = "Login Successful! Redirecting to dashboard...";
+            
+            // Redirect to the dashboard
+            setTimeout(() => {
+                window.location.href = 'reseller-dashboard.html';
+            }, 800);
+        } else {
+            msg.textContent = data.message || "Invalid credentials.";
+        }
+    });
 }
 
-// --- CONTACT FUNCTION ---
+document.addEventListener('DOMContentLoaded', () => {
+    const resellerToken = localStorage.getItem('resellerToken');
+    // If returning from dashboard, update the button text
+    if (resellerToken && window.location.pathname.endsWith('resell.html')) {
+        const resBtn = document.querySelector('.resellerLogin');
+        if (resBtn) {
+            resBtn.textContent = "Reseller Dashboard";
+            resBtn.onclick = () => window.location.href = 'reseller-dashboard.html';
+        }
+    }
+});
 
+function toggleResellerAuth(showRegister) {
+    const loginDiv = document.getElementById('resellerLoginFields');
+    const regDiv = document.getElementById('resellerRegisterFields');
+    const msg = document.getElementById('resMsg');
+
+    if (loginDiv && regDiv) {
+        loginDiv.style.display = showRegister ? 'none' : 'block';
+        regDiv.style.display = showRegister ? 'block' : 'none';
+        if (msg) msg.textContent = ''; 
+    }
+}
+
+async function resellerRegister() {
+    const name = document.getElementById('resRegName').value.trim();
+    const email = document.getElementById('resRegEmail').value.trim();
+    const p1 = document.getElementById('resRegPass1').value.trim();
+    const p2 = document.getElementById('resRegPass2').value.trim();
+    const msg = document.getElementById('resMsg');
+
+    if (!name || !email || !p1 || !p2) {
+        msg.textContent = "Please fill all fields.";
+        msg.style.color = "red";
+        return;
+    }
+
+    if (p1 !== p2) {
+        msg.textContent = "Passwords do not match!";
+        msg.style.color = "red";
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/auth/reseller-register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password: p1 })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            msg.style.color = "green";
+            msg.textContent = "Account created! You can now Login.";
+            setTimeout(() => toggleResellerAuth(false), 2000);
+        } else {
+            msg.textContent = data.message || "Registration failed.";
+            msg.style.color = "red";
+        }
+    } catch (err) {
+        msg.textContent = "Server error. Try again.";
+    }
+}
+
+// 4. Helper: Close Reseller Modal
+function closeReseller() {
+    const resModal = document.getElementById('resellerModal');
+    if (resModal) resModal.style.display = 'none';
+}
+
+// *****************************************************************
+// 7. CONTACT US DASHBOARD
+// *****************************************************************
 function closeContact() {
     const contactModal = safeGetElement('contactModal');
     if (contactModal) contactModal.style.display = 'none';
@@ -665,12 +904,11 @@ function renderNavButton() {
     // Assuming the HTML structure is already correct and we don't need to rebuild the button every time,
     // just re-read the cart count. The original structure of `nav-right` is better left static if possible.
     updateCartCount();
->>>>>>> 06684e430fb1ca972e73e9c885dd5031266e23aa
 }
 
 
 // *****************************************************************
-// 5. EVENT LISTENERS
+// 8. EVENT LISTENERS AND PAGE LOGIC 
 // *****************************************************************
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -791,8 +1029,6 @@ function fetchOrderHistory() {
                     </div>
                 `).join('')}
             </div>
-
-<<<<<<< HEAD
             <div class="order-total">
                 Total: ₹${order.total} <br>
                 <small style="font-size:0.8rem; color:#555;">Via ${order.method}</small>
@@ -801,7 +1037,6 @@ function fetchOrderHistory() {
         `;
     }).reverse().join(''); // .reverse() shows newest orders first
 }
-=======
 // -------------------- REGISTRATION PAGE LOGIC --------------------
 const registerForm = safeGetElement('registerForm');
 
@@ -918,9 +1153,6 @@ window.handleCheckout = handleCheckout;
 window.validatePincode = validatePincode;
 
 
-// frontend/artifacts.js
-// === Shop Page JS ===
-
 // Toggle sidebar filters (for mobile)
 document.addEventListener("DOMContentLoaded", () => {
               const filterBtn = document.createElement("button");
@@ -938,8 +1170,6 @@ document.addEventListener("DOMContentLoaded", () => {
               });
           });
 
-// frontend/saree.js
-// === Shop Page JS ===
 
 // Toggle sidebar filters (for mobile)
 document.addEventListener("DOMContentLoaded", () => {
@@ -970,4 +1200,3 @@ function renderNavButton() {
         }
     }
 }
->>>>>>> 06684e430fb1ca972e73e9c885dd5031266e23aa

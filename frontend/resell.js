@@ -19,7 +19,3 @@ function renderItems(items) {
   `).join('');
 }
 
-function joinReseller() {
-  logout(); // reuse your existing logout()
-  window.location.href = 'reseller-dashboard.html';
-}

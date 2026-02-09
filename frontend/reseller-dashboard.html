@@ -12,28 +12,36 @@
 <body>
     <div class="dashboard-container">
         <h1>Reseller Dashboard</h1>
+        <button onclick="window.location.href='resell.html'" class="btn btn-outline-success">
+            Go Back to Resell Page
+        </button>
         <p>Add, update or remove items for resale</p>
-        <form id="resellForm" class="product-form">
+        <form id="resellForm" class="product-form" enctype="multipart/form-data">
+
             <input type="file" name="image" id="itemImage" required>
-            <input type="text" placeholder="Item Name" required>
-            <textarea placeholder="Description"></textarea>
 
-            <select required>
-                <option>Saree Collection</option>
-                <option>Artifacts Collection</option>
-                <option>Lifestyle Picks</option>
+            <input type="text" name="name" placeholder="Item Name" required>
+
+            <textarea name="description" placeholder="Description"></textarea>
+
+            <select name="category" required>
+                <option value="Saree Collection">Saree Collection</option>
+                <option value="Artifacts Collection">Artifacts Collection</option>
+                <option value="Lifestyle Picks">Lifestyle Picks</option>
             </select>
 
-            <select required>
-                <option>Second Hand</option>
-                <option>New</option>
+            <select name="itemType" required>
+                <option value="Second Hand">Second Hand</option>
+                <option value="New">New</option>
             </select>
 
-            <input type="number" placeholder="Price" required>
-            <input type="file" required>
+            <input type="number" name="price" placeholder="Price" required>
 
-            <button>Add Item</button>
+            <button type="submit">Add Item</button>
+            <div id="dashboardMsg" style="margin: 15px 0; padding: 10px; border-radius: 5px; display: none; text-align: center; font-weight: 600;"></div>
         </form>
+
+
     </div>
     <script src="reseller-dashboard.js"></script>
 

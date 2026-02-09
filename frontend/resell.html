@@ -22,12 +22,12 @@
             Join as Reseller
             </button>
 
-            <div class="cart" onclick="location.href='cart.html'">
-            <i class="fa-solid fa-cart-shopping"></i>
-            </div>
-
-            <div class="login" onclick="openLogin()">
-            <i class="fa-solid fa-user"></i>
+            <div class="nav-right">
+                <div class="cart" onclick="window.location.href='cart.html'">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span id="cart-count">0</span>
+                </div>
+                <div class="login" onclick="openLogin()"><i class="fa-solid fa-user"></i></div>
             </div>
         </div>
     </nav>
@@ -197,24 +197,80 @@
                 </section>
             </div>
 
-    <!-- RESELLER MODAL -->
-    <div id="resellerModal" class="modal">
-        <div class="modal-card">
-            <h2>Reseller Login</h2>
+    <div id="resellerModal" class="login-modal" style="display: none;">
+        <div class="login-card">
+            
+            <div id="resellerLoginFields">
+                <h3>Reseller Login</h3>
+                <input id="resEmail" type="email" placeholder="Reseller Email" required>
+                <input id="resPassword" type="password" placeholder="Password" required>
+                <button class="btn-green" onclick="resellerLogin()">Login</button>
+                <p style="margin-top:15px; font-size:0.9rem;">
+                    New? <a href="javascript:void(0)" onclick="toggleResellerAuth(true)" style="color:#4F6F52; font-weight:600;">Register as Reseller</a>
+                </p>
+            </div>
 
-            <input id="resEmail" placeholder="Email">
-            <input id="resPassword" type="password" placeholder="Password">
-            <div id="resMsg"></div>
+            <div id="resellerRegisterFields" style="display: none;">
+                <h3>New Reseller Sign-Up</h3>
+                <input id="resRegName" type="text" placeholder="Full Name" required>
+                <input id="resRegEmail" type="email" placeholder="Email Address" required>
+                <input id="resRegPass1" type="password" placeholder="Create Password" required>
+                <input id="resRegPass2" type="password" placeholder="Confirm Password" required>
+                <button class="btn-green" onclick="resellerRegister()">Sign Up & Join</button>
+                <p style="margin-top:15px; font-size:0.9rem;">
+                    Already a Reseller? <a href="javascript:void(0)" onclick="toggleResellerAuth(false)" style="color:#4F6F52; font-weight:600;">Login</a>
+                </p>
+            </div>
 
-            <button onclick="resellerLogin()">Login</button>
-            <button class="close-btn" onclick="closeReseller()">Close</button>
+            <div id="resMsg" class="error" style="margin-top:10px; min-height: 20px;"></div>
+            <button class="close-btn" onclick="closeReseller()" style="margin-top:10px;">Close</button>
         </div>
     </div>
 
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+            <h3>About Us</h3>
+            <p>We aim to connect sellers and buyers through a simple and elegant platform. 
+                <a href="about.html">Learn more →</a>
+            </p>
+            </div>
+
+            <div class="footer-section">
+            <h3>Quick Links</h3>
+            <ul>
+                <li><a href="about.html">About Us</a></li>
+                <li><a href="shop-now.html">Shop Now</a></li>
+                <li><a href="#" onclick="openSeller()">Join as Seller</a></li>
+                <li><a href="contact.html" onclick="openContact()">Contact Us</a></li>
+            </ul>
+            </div>
+
+            <div class="footer-section"> 
+            <h3>Stay Updated</h3>
+            <form id="newsletterForm">
+                <input type="email" placeholder="Enter your email" required>
+                <button type="submit">Subscribe</button>
+                <p id="newsletterMsg"></p>
+            </form>
+            </div>
+
+            <div class="footer-section">
+            <h3>Follow Us</h3>
+            <div class="social-links">
+                <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
+                <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
+            </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 Hand2Heart. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script src="script.js"></script> 
-    <script src="resell.js"></script>
-
 
 </body>
 </html>
